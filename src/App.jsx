@@ -16,14 +16,19 @@ function App() {
           <img src={viteLogo} className="vite" alt="Vite logo" />
         </div>
         <div>
-          <h1>Get started</h1>
+          <h1>Frontend Development Practice</h1>
           <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+            This project documents my JavaScript and React
+          learning journey.
           </p>
+           <p>
+          JavaScript exercises are available in
+          <code> src/practice/practice.js</code>.
+        </p>
         </div>
         <button
           type="button"
-          className="counter"
+          className="counter hidden"
           onClick={() => setCount((count) => count + 1)}
         >
           Count is {count}
