@@ -25,9 +25,45 @@ console.log(isEven(10)); // true
 console.log(isEven(11)); // false
 
 
-let colors = ["Red", "Blue", "Green", "Yellow", "White"];
+let price = "250";
+let quantity = 2;
+let total = price + quantity;
+console.log(total); //2052
+console.log(typeof total); //string 
 
-  colors.forEach((color , index) => {
-    console.log(color , index);
-    console.log(`${color} ${index}`);
-  });
+
+
+const numbers = [2, 4, 6];
+const result = numbers.map((num) => {
+    return num + 5;
+});
+console.log(result); //7, 9, 11
+
+
+const prices = [100, 200, 300];
+const result2 = prices.map((price) => {
+  if (price > 150) {
+    return price * 2;
+  }
+});
+console.log(result2);// [undefined, 400, 600]
+
+
+const prodNumbers = [2, 5, 8, 10];
+const prodResult = prodNumbers
+  .filter((num) => num > 5)
+  .map((num) => num * 2);
+
+console.log(result); // 7, 9, 11
+
+
+let scopePrice = 100;
+function updatePrice() {
+  let price = 200;
+  if (true) {
+    price = 300;
+  }
+  console.log(price);
+}
+updatePrice();
+console.log(scopePrice); //300, 100
