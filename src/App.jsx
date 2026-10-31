@@ -3,9 +3,13 @@ import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import './App.css'
+import { products } from "./data/products.js";
+import { storeName } from "./data/store";
+import { ProductCard } from "./components/ProductCard";
 
 function App() {
   const [count, setCount] = useState(0)
+  const firstProduct = products;
 
   return (
     <>
@@ -16,7 +20,7 @@ function App() {
           <img src={viteLogo} className="vite" alt="Vite logo" />
         </div>
         <div>
-          <h1>Frontend Development Practice</h1>
+          <h1>{storeName}</h1>
           <p>
             This project documents my JavaScript and React
           learning journey.
@@ -28,11 +32,24 @@ function App() {
         </div>
         <button
           type="button"
-          className="counter hidden"
+          className="counter"
           onClick={() => setCount((count) => count + 1)}
         >
           Count is {count}
         </button>
+      </section>
+
+      <section id="featuredProducts">
+        <h2>Fearured Products</h2>
+        <ul>
+          {products.map((product) => (
+            <li>
+            <div key={product.id}>
+              <ProductCard product={product} />
+            </div>
+          </li>
+        ))}
+        </ul>
       </section>
 
       <div className="ticks"></div>
