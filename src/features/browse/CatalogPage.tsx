@@ -5,6 +5,7 @@ import { Link, useLocation, useSearchParams } from 'react-router'
 import { categories, categorySchema, sortSchema } from '../../api/schemas'
 import { useDebouncedAction } from '../../hooks/useDebouncedAction'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { BackToTop } from './BackToTop'
 import { actionClass, BrowseMessage, RetryMessage } from './BrowseMessage'
 import { PriceAndStock, ProductPhoto } from './ProductDisplay'
 import { browseError, catalogQuery, readScenario } from './browse-queries'
@@ -269,6 +270,7 @@ export function CatalogPage({ mockScenarios }: { mockScenarios: boolean }) {
       ) : (
         <CatalogResults filters={filters} scenario={scenario} />
       )}
+      <BackToTop />
     </>
   )
 }

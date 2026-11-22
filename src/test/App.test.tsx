@@ -2,10 +2,12 @@
 import '@testing-library/jest-dom/vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
+  act,
   cleanup,
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -228,4 +230,99 @@ test('replaces a broken product image with the placeholder', async () => {
   fireEvent.error(image)
   expect(image).toHaveAttribute('src', '/product-placeholder.svg')
   expect(image).toHaveAttribute('alt', '')
+})
+
+test('cancels an old detail request and never shows it on the new route', async () => {
+  const started = Promise.withResolvers<void>()
+  const release = Promise.withResolvers<void>()
+  const aborted = Promise.withResolvers<void>()
+  server.use(
+    http.get('*/api/products/product-0002', async ({ request }) => {
+      request.signal.addEventListener('abort', () => aborted.resolve(), {
+        once: true,
+      })
+      started.resolve()
+      await release.promise
+      return HttpResponse.json(inventory.get('product-0002'))
+    }),
+  )
+  const { user } = open('/products/product-0002')
+  try {
+    await started.promise
+    await user.click(screen.getByRole('link', { name: 'Open coffee directly' }))
+    await aborted.promise
+    expect(
+      await screen.findByRole('heading', { name: 'Developer Coffee 0001' }),
+    ).toBeVisible()
+    await act(async () => {
+      release.resolve()
+      await release.promise
+    })
+    expect(
+      screen.queryByRole('heading', { name: 'Debug Duck 0001' }),
+    ).not.toBeInTheDocument()
+  } finally {
+    release.resolve()
+  }
+})
+
+test('does not show a previously loaded product while the next detail is pending', async () => {
+  const release = Promise.withResolvers<void>()
+  server.use(
+    http.get('*/api/products/product-0003', async () => {
+      await release.promise
+      return HttpResponse.json(inventory.get('product-0003'))
+    }),
+  )
+  const { user } = open('/products/product-0002')
+  try {
+    await screen.findByRole('heading', { name: 'Debug Duck 0001' })
+    await user.click(screen.getByRole('link', { name: 'Open coffee directly' }))
+    expect(screen.getByText('Loading product…')).toBeVisible()
+    expect(screen.queryByText('Debug Duck 0001')).not.toBeInTheDocument()
+    release.resolve()
+    expect(
+      await screen.findByRole('heading', { name: 'Developer Coffee 0001' }),
+    ).toBeVisible()
+  } finally {
+    release.resolve()
+  }
+})
+
+test('removes the scroll listener on unmount and moves focus when returning to top', async () => {
+  const scrollTo = vi.spyOn(window, 'scrollTo')
+  const add = vi.spyOn(window, 'addEventListener')
+  const remove = vi.spyOn(window, 'removeEventListener')
+  const before = window.scrollY
+  const { user, unmount } = open()
+  try {
+    expect(
+      screen.queryByRole('button', { name: 'Back to top' }),
+    ).not.toBeInTheDocument()
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 700 })
+    fireEvent.scroll(window)
+    await user.click(screen.getByRole('button', { name: 'Back to top' }))
+    expect(scrollTo).toHaveBeenCalledWith({
+      top: 0,
+      behavior: 'instant',
+    })
+    expect(screen.getByRole('main')).toHaveFocus()
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 })
+    fireEvent.scroll(window)
+    expect(
+      screen.queryByRole('button', { name: 'Back to top' }),
+    ).not.toBeInTheDocument()
+    unmount()
+    const subscriptions = add.mock.calls.filter(([type]) => type === 'scroll')
+    expect(subscriptions.length).toBeGreaterThan(0)
+    await waitFor(() => {
+      for (const [, listener] of subscriptions)
+        expect(remove).toHaveBeenCalledWith('scroll', listener)
+    })
+  } finally {
+    Object.defineProperty(window, 'scrollY', {
+      configurable: true,
+      value: before,
+    })
+  }
 })

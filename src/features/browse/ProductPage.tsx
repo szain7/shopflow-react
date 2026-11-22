@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { BackToTop } from './BackToTop'
 import { actionClass, BrowseMessage, RetryMessage } from './BrowseMessage'
 import { PriceAndStock, ProductPhoto } from './ProductDisplay'
 import {
@@ -82,6 +83,7 @@ function ProductContent({
           )}
         </>
       )}
+      <BackToTop />
     </>
   )
 }
