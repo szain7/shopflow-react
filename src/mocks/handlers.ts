@@ -6,8 +6,8 @@ import {
   productPageSize,
   sortSchema,
 } from '../api/schemas'
-import type { OrderBody, Product } from '../api/schemas'
-import { inventory } from './inventory'
+import type { OrderBody } from '../api/schemas'
+import { catalogOrder, inventory } from './inventory'
 import { createMockState, demoCredentials, demoUser } from './state'
 
 function error(
@@ -40,9 +40,6 @@ function canonicalOrder(order: OrderBody) {
 }
 
 export function createHandlers(state: ReturnType<typeof createMockState>) {
-  const getStock = (product: Product, reserved: ReadonlyMap<string, number>) =>
-    Math.max(0, product.stock - (reserved.get(product.id) ?? 0))
-
   return [
     http.get('*/api/products', async ({ request }) => {
       const override = await scenarioResponse(request)
@@ -63,31 +60,26 @@ export function createHandlers(state: ReturnType<typeof createMockState>) {
           ? requestedPage
           : 1
       const reserved = state.reservedStock()
-      const items = Array.from(inventory.values())
-        .filter(
-          (product) =>
-            (!category || product.category === category) &&
-            product.name.toLowerCase().includes(search),
-        )
-        .map((product) => ({ ...product, stock: getStock(product, reserved) }))
-        .filter(({ stock }) => params.get('inStock') !== 'true' || stock > 0)
-        .sort((a, b) => {
-          const comparisons = {
-            'name-asc': a.name.localeCompare(b.name),
-            'price-asc': a.price - b.price,
-            'price-desc': b.price - a.price,
-            'rating-desc': b.rating - a.rating,
-          }
-          return comparisons[sort] || a.id.localeCompare(b.id)
-        })
-
-      return HttpResponse.json({
-        items: items.slice(
-          (page - 1) * productPageSize,
-          page * productPageSize,
-        ),
-        total: items.length,
-      })
+      const ordered = catalogOrder[sort]
+      const inStock = params.get('inStock') === 'true'
+      const matches =
+        category || search || inStock
+          ? ordered.filter(
+              ({ product, searchName }) =>
+                (!category || product.category === category) &&
+                searchName.includes(search) &&
+                (!inStock || state.stockFor(product, reserved) > 0),
+            )
+          : ordered
+      const pageRows = matches.slice(
+        (page - 1) * productPageSize,
+        page * productPageSize,
+      )
+      const items = pageRows.map(({ product }) => ({
+        ...product,
+        stock: state.stockFor(product, reserved),
+      }))
+      return HttpResponse.json({ items, total: matches.length })
     }),
     http.get('*/api/products/:id', async ({ params, request }) => {
       const override = await scenarioResponse(request)
@@ -103,7 +95,7 @@ export function createHandlers(state: ReturnType<typeof createMockState>) {
         return error(404, 'PRODUCT_NOT_FOUND', 'Product does not exist.')
       return HttpResponse.json({
         ...product,
-        stock: getStock(product, state.reservedStock()),
+        stock: state.stockFor(product, state.reservedStock()),
       })
     }),
     http.post('*/api/login', async ({ request }) => {
@@ -171,7 +163,7 @@ export function createHandlers(state: ReturnType<typeof createMockState>) {
         const product = inventory.get(productId)
         if (!product)
           return error(400, 'UNKNOWN_PRODUCT', 'An order item does not exist.')
-        const available = getStock(product, reserved)
+        const available = state.stockFor(product, reserved)
         if (quantity > available) {
           return error(409, 'OUT_OF_STOCK', 'An item exceeds current stock.', {
             productId,

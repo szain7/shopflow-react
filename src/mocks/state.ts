@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { orderBodySchema } from '../api/schemas'
-import type { OrderBody } from '../api/schemas'
+import type { OrderBody, Product } from '../api/schemas'
 
 export const demoCredentials = {
   email: 'learner@example.test',
@@ -35,9 +35,17 @@ function readLedger(storage: Storage | undefined): Ledger {
 
 export function createMockState(storage?: Storage) {
   const sessions = new Map<string, number>()
+  const stockOverrides = new Map<string, number>()
   let ledger = readLedger(storage)
 
   return {
+    setBaseStock(id: string, stock: number) {
+      stockOverrides.set(id, stock)
+    },
+    stockFor(product: Product, reserved: ReadonlyMap<string, number>) {
+      const base = stockOverrides.get(product.id) ?? product.stock
+      return Math.max(0, base - (reserved.get(product.id) ?? 0))
+    },
     startSession() {
       const token = crypto.randomUUID()
       sessions.set(token, Date.now() + 30 * 60 * 1000)
@@ -87,6 +95,7 @@ export function createMockState(storage?: Storage) {
     },
     reset() {
       sessions.clear()
+      stockOverrides.clear()
       ledger = []
       storage?.removeItem(storageKey)
     },

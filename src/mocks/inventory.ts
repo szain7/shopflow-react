@@ -27,3 +27,22 @@ export const inventory = new Map<string, Product>(
     }),
   ),
 )
+
+const searchRows = Array.from(inventory.values(), (product) => ({
+  product,
+  searchName: product.name.toLowerCase(),
+}))
+
+function sorted(compare: (a: Product, b: Product) => number) {
+  return [...searchRows].sort(
+    ({ product: a }, { product: b }) =>
+      compare(a, b) || a.id.localeCompare(b.id),
+  )
+}
+
+export const catalogOrder = {
+  'name-asc': sorted((a, b) => a.name.localeCompare(b.name)),
+  'price-asc': sorted((a, b) => a.price - b.price),
+  'price-desc': sorted((a, b) => b.price - a.price),
+  'rating-desc': sorted((a, b) => b.rating - a.rating),
+}
