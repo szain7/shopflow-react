@@ -21,3 +21,13 @@ The engineer's personal judgment about what they would keep under their control 
 | “Check keyboard interaction and mobile, tablet, and desktop layouts.”     | Codex ran Chrome against the catalog and production preview.                                                                | The smoke check covered the skip link, opening a detail page, and browser reload and history.                        |
 
 **Caught during verification:** Type-aware lint flagged an unsafe read of the Vite currency setting. Codex treated the setting as unknown and checked its type and code format before using it.
+
+## Day 3
+
+| Prompt excerpt                                                          | Work retained                                                                                           | What changed and why                                                                                                            |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| “Derive the header cart count and total through selectors.”             | Codex added the Redux cart, validated persistence and selectors.                                        | TanStack Query kept ownership of stock and catalog data. Cart quantities remain visible when stock falls.                       |
+| “Reuse the same idempotency key for retries of the same logical order.” | Codex saved a frozen request and added tests for duplicate submits, replay and reload.                  | The lost-response test creates an order before dropping the response. It recreates both app and mock state for the reload case. |
+| “Verify the full flow in the browser with mocks enabled.”               | Codex ran Chrome through purchase, sign-out, cart persistence, and a competing order that caused a 409. | The browser check also measured horizontal overflow at three viewport widths.                                                   |
+
+**Caught during verification:** The first sign-out handler and the protected-route guard both tried to redirect. The test exposed the navigation conflict. Codex removed the extra redirect and verified that the existing guard takes the signed-out user to login.

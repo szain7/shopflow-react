@@ -86,13 +86,29 @@ Phase 0 has no remaining work and no new commit.
 
 [Buy guide](ai/buy.md)
 
-| ID   | Status  | Evidence | Remaining work                                         | Commit |
-| ---- | ------- | -------- | ------------------------------------------------------ | ------ |
-| D3-1 | Pending | —        | Set up Redux cart and session                          | —      |
-| D3-2 | Pending | —        | Add persistent cart and protected, idempotent checkout | —      |
-| D3-3 | Pending | —        | Add login, logout and protected routes                 | —      |
-| D3-4 | Pending | —        | Map API errors to safe messages                        | —      |
-| D3-5 | Pending | —        | Verify cache reuse and stock reconciliation            | —      |
+| ID   | Status   | Evidence                                                                                                                    | Remaining work | Commit                                            |
+| ---- | -------- | --------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------- |
+| D3-1 | Complete | Redux cart and memory-only session, derived count and total, and Query-owned server data                                    | —              | D3-1 Add shared Redux cart and session state      |
+| D3-2 | Complete | Validated cart persistence, protected checkout, mock-backed confirmation, and replay tests after a lost response and reload | —              | D3-2 Add persistent cart and idempotent checkout  |
+| D3-3 | Complete | Login, logout, protected return routes, 401 handling, cache removal, and [authentication guide](auth.md)                    | —              | D3-3 Isolate authentication and private queries   |
+| D3-4 | Complete | Tests for safe 400 field errors, 401 redirects, 404, named 409 conflicts, and 500 retry                                     | —              | D3-4 Verify safe API error handling               |
+| D3-5 | Complete | Verified detail cache reuse, product invalidation after orders, and cart stock warnings after refresh                       | —              | D3-5 Verify product cache reuse and stock updates |
+
+### Day 3 review
+
+- Invalid numbers and malformed persisted carts are rejected. Verified quantity updates, derived totals, and reload behavior.
+- Private query keys include a fresh, non-secret session scope. Logout and session replacement remove private entries. A delayed previous-account response was aborted and could not repopulate the cache after a new login.
+- Verified duplicate login blocking, safe return paths after successful login, 401 handling, and that the login flow writes neither the token nor password to storage or app logs.
+- Verified that duplicate submissions are blocked and lost-response retries reuse the exact body and key, including after reload and sign-in. A definitive 409 keeps the cart editable. Correcting the quantity produces a new body and key. Cart items remain until a validated order response.
+- Checkout recovery applies within the documented mock tab session and account. Keep the pending intent and ledger until the order resolves.
+
+### Day 3 validation
+
+- App lint, strict type checking, formatting, production build, and all 57 tests passed.
+- Chrome with development mocks verified catalog → add to cart → update quantity → reload the cart → sign in → checkout → confirmation. It also verified logout, a competing order that produced a named 409 while keeping the cart, and no horizontal overflow at 360, 768, and 1280 px on cart, login, checkout, and confirmation. Production preview registered no mock worker.
+- Tests forced duplicate submit events and an accepted order with a lost reply. Manual retry returned the original order in the same page and after rehydrating both the app and mock ledger and signing in again.
+- Repository-wide lint still reports the four existing exercise errors documented above. Practice files were unchanged.
+- Day 3 is recorded in the five commits above. Day 4 has not started.
 
 ## Day 4 — Harden
 

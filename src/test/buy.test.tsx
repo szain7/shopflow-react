@@ -368,6 +368,48 @@ test('public 401 clears only the session that started the request and sends no t
   }
 })
 
+test('successful checkout clears the cart and refreshes cached stock', async () => {
+  const runtime = authenticated(2)
+  const fixture = { ...product }
+  runtime.client.setQueryData(
+    ['products', 'detail', fixture.id, undefined],
+    fixture,
+  )
+  const view = open('/checkout', runtime)
+  const place = screen.getByRole('button', { name: 'Place order' })
+  await waitFor(() => expect(place).toBeEnabled())
+  await view.user.click(place)
+  expect(await screen.findByText('Order received')).toBeVisible()
+  expect(view.store.getState().cart).toEqual([])
+  expect(sessionStorage.getItem(intentKey)).toBeNull()
+  expect(
+    runtime.client.getQueryState(['products', 'detail', fixture.id, undefined])
+      ?.isInvalidated,
+  ).toBe(true)
+  await view.user.click(screen.getByRole('link', { name: 'Continue browsing' }))
+  await view.user.type(screen.getByRole('searchbox'), 'developer coffee 0001')
+  expect(await screen.findByText('Out of stock')).toBeVisible()
+})
+
+test('reuses a fresh product detail response on revisit', async () => {
+  let requests = 0
+  server.use(
+    http.get('*/api/products/product-0003', () => {
+      requests++
+      return HttpResponse.json(product)
+    }),
+  )
+  const view = open('/products/product-0003?search=developer+coffee+0001')
+  await screen.findByRole('heading', { name: product.name })
+  const firstVisit = requests
+  await view.user.click(screen.getByRole('link', { name: 'Back to products' }))
+  await view.user.click(await screen.findByRole('link', { name: product.name }))
+  expect(
+    await screen.findByRole('heading', { name: product.name }),
+  ).toBeVisible()
+  expect(requests).toBe(firstVisit)
+})
+
 function orderRequests(calls: Parameters<typeof fetch>[]) {
   return calls
     .filter(([input]) => {
