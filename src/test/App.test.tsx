@@ -14,9 +14,11 @@ import {
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { StrictMode } from 'react'
+import { Provider } from 'react-redux'
 import { Link, MemoryRouter, useLocation, useNavigate } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from '../App'
+import { createShopStore } from '../app/store'
 import { useDebouncedAction } from '../hooks/useDebouncedAction'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { inventory } from '../mocks/inventory'
@@ -56,12 +58,14 @@ function open(entry = '/', mockScenarios = false) {
   })
   const view = render(
     <StrictMode>
-      <QueryClientProvider client={client}>
-        <MemoryRouter initialEntries={[entry]}>
-          <App mockScenarios={mockScenarios} />
-          <NavigationControls />
-        </MemoryRouter>
-      </QueryClientProvider>
+      <Provider store={createShopStore(client)}>
+        <QueryClientProvider client={client}>
+          <MemoryRouter initialEntries={[entry]}>
+            <App mockScenarios={mockScenarios} />
+            <NavigationControls />
+          </MemoryRouter>
+        </QueryClientProvider>
+      </Provider>
     </StrictMode>,
   )
   return { ...view, user: userEvent.setup(), client }

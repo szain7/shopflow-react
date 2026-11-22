@@ -1,5 +1,8 @@
+import { formatPrice } from './components/ui/format-price'
 import { useEffect, useRef } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router'
+import { selectCartCount, selectCartTotal } from './app/store'
+import { useShopSelector } from './app/store-hooks'
 import { CatalogPage } from './features/browse/CatalogPage'
 import { MissingPage, ProductPage } from './features/browse/ProductPage'
 
@@ -11,6 +14,8 @@ export default function App({
   const { pathname } = useLocation()
   const previousPath = useRef(pathname)
   const main = useRef<HTMLElement>(null)
+  const count = useShopSelector(selectCartCount)
+  const total = useShopSelector(selectCartTotal)
 
   useEffect(() => {
     if (previousPath.current !== pathname) {
@@ -29,13 +34,16 @@ export default function App({
         Skip to main content
       </a>
       <header className="border-b border-line bg-panel">
-        <div className="mx-auto max-w-7xl px-5 py-5 sm:px-8">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-8">
           <Link
             className="rounded-sm text-lg font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             to="/"
           >
             Shopflow
           </Link>
+          <span>
+            Cart ({count}) {formatPrice(total)}
+          </span>
         </div>
       </header>
       <main

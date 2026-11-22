@@ -1,8 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router'
 import App from './App'
+import { browserStorage, createShopStore } from './app/store'
 import './styles/app.css'
 
 async function bootstrap() {
@@ -16,13 +18,21 @@ async function bootstrap() {
   const container = document.getElementById('root')
   if (!container) throw new Error('Shopflow root element is missing.')
 
+  const queryClient = new QueryClient()
+  const store = createShopStore(
+    queryClient,
+    browserStorage('localStorage'),
+    browserStorage('sessionStorage'),
+  )
   createRoot(container).render(
     <StrictMode>
-      <QueryClientProvider client={new QueryClient()}>
-        <BrowserRouter>
-          <App mockScenarios={mockScenarios} />
-        </BrowserRouter>
-      </QueryClientProvider>
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <App mockScenarios={mockScenarios} />
+          </BrowserRouter>
+        </QueryClientProvider>
+      </Provider>
     </StrictMode>,
   )
 }
