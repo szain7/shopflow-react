@@ -6,7 +6,9 @@ Shopflow is a developer gear storefront built for The Bug Bazaar assignment. Bro
 
 1. Clone the repository and open the `shopflow-react` folder.
 2. Use Node **26.13.0** from `.nvmrc`. The setup was verified with npm **11.20.0**.
-3. Run `npm ci`, then `npm run dev`. Open the local URL Vite prints.
+3. Run `npm ci`.
+4. Copy `.env.example` to `.env.local` and set `VITE_ENABLE_MOCKS=true`.
+5. Run `npm run dev`. Open the local URL Vite prints, usually `http://localhost:5173/`.
 
 ### Public environment variables
 
@@ -16,7 +18,14 @@ For the local catalog without a backend, copy `.env.example` to `.env.local`, se
 
 See the [API contract](docs/api-contract.md#reproduce-scenarios) for links that reproduce catalog and detail states.
 
-To try checkout, add a product, open the cart, and select **Checkout**. Sign in with `learner@example.test` and `shopflow-demo` when using mocks. The [authentication guide](docs/auth.md) explains what survives a reload.
+To try checkout, add a product, open the cart, and select **Checkout**. Use the mock email `learner@example.test` and password `shopflow-demo`. The sign-in route is `/login`.
+
+## Features and demo limits
+
+- Browse 5,000 mock products with shareable filters, sorting, pagination, and detail pages.
+- Update the persisted cart, sign in, check out, and view confirmation. The cart survives reload. The memory-only session requires another sign-in.
+- Live mock stock uses a WebSocket. Stock conflicts keep the requested quantity visible and show what to change.
+- Checkout retry protection applies to the same account and mock tab session while the pending intent and ledger survive. The demo simulates order status and stock reservations. Live payments and fulfillment workers are outside its scope. See [authentication](docs/auth.md) and [orders](docs/orders.md).
 
 ## Scripts
 
@@ -36,3 +45,9 @@ To try checkout, add a product, open the cart, and select **Checkout**. Sign in 
 | `npm run practice:test` | Run the original practice script previously mapped to `npm test`    |
 
 PowerShell users can use `npm.cmd` if their execution policy blocks `npm.ps1`. See [progress](docs/progress.md) for validation and [decisions](docs/decisions.md) for trade-offs.
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md), [API and mock scenarios](docs/api-contract.md), and [glossary](docs/glossary.md)
+- [Accessibility](docs/accessibility.md), [performance](docs/performance.md), [monitoring](docs/monitoring.md), and [CI setup](docs/ci.md)
+- [Acceptance checklist](docs/acceptance-checklist.md), [PR draft](docs/pr-description.md), and [walkthrough](docs/walkthrough.md)

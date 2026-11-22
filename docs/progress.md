@@ -142,14 +142,20 @@ Phase 0 has no remaining work and no new commit.
 
 [Explain guide](ai/explain.md)
 
-| ID   | Status  | Evidence | Remaining work                                    | Commit |
-| ---- | ------- | -------- | ------------------------------------------------- | ------ |
-| D5-1 | Pending | —        | Document actual architecture and state ownership  | —      |
-| D5-2 | Pending | —        | Identify three implemented patterns               | —      |
-| D5-3 | Pending | —        | Diagram the conceptual order queue and workers    | —      |
-| D5-4 | Pending | —        | Write the six-term glossary                       | —      |
-| D5-5 | Pending | —        | Collect genuine partner architecture feedback     | —      |
-| D5-6 | Pending | —        | Complete genuine partner PR reviews and responses | —      |
-| D5-7 | Pending | —        | Record actual AI use and a caught mistake         | —      |
-| D5-8 | Pending | —        | Collect personal tracker ratings and next steps   | —      |
-| D5-9 | Pending | —        | Finish PR, verify CI and deliver walkthrough      | —      |
+| ID   | Status              | Evidence                                                                                                             | Remaining work                                              | Commit                                            |
+| ---- | ------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------- |
+| D5-1 | Documentation ready | [Actual architecture and diagrams](ARCHITECTURE.md)                                                                  | Explain a design choice in the walkthrough                  | D5-1 Document architecture and design patterns    |
+| D5-2 | Complete locally    | [Three patterns with code references and trade-offs](ARCHITECTURE.md)                                                | —                                                           | D5-1 Document architecture and design patterns    |
+| D5-3 | Complete locally    | [Proposed workers, retry and mock limits](orders.md)                                                                 | —                                                           | D5-3 Describe the proposed order workflow         |
+| D5-4 | Draft               | [Six explained glossary terms](glossary.md)                                                                          | Review and put explanations in your own words               | D5-4 Draft Shopflow glossary                      |
+| D5-5 | External pending    | [Partner architecture checklist](peer-review.md)                                                                     | Genuine feedback                                            | D5-5 Prepare partner architecture and PR reviews  |
+| D5-6 | External pending    | [Partner PR checklist](peer-review.md)                                                                               | Genuine review comments, praise and replies                 | D5-5 Prepare partner architecture and PR reviews  |
+| D5-7 | Draft               | [Actual prompts, decisions and caught mistake](ai-notes.md)                                                          | Add one thing you would not delegate and why                | D5-7 Compile factual AI-use evidence              |
+| D5-8 | Draft               | [Provisional evidence and blank ratings](reflection.md)                                                              | Official tracker, personal ratings, two gaps and next steps | D5-8 Prepare reflection evidence and prompts      |
+| D5-9 | External pending    | [PR draft](pr-description.md), [timed walkthrough](walkthrough.md), and [31-task checklist](acceptance-checklist.md) | Final PR, hosted CI, and spoken walkthrough                 | D5-9 Prepare submission and record pending checks |
+
+### Day 5 scope
+
+Documentation and submission preparation only. Day 4 standalone screen-reader verification, GitHub-hosted workflow execution, and required-status-check enforcement remain pending. The commits above record local documentation and preparation. The final PR and deployment remain outside this review.
+
+Verified 146 local links, two Mermaid diagrams, npm script names, and all 31 task IDs. App lint, strict type checking, formatting, all 63 tests, and the production build passed. Chrome verified the mocked development catalog and a production cart deep link without a mock worker. Repository-wide lint still reports the four existing exercise errors.
