@@ -1,6 +1,6 @@
 import { formatPrice } from './components/ui/format-price'
 import { useEffect, useRef } from 'react'
-import { Link, Route, Routes, useLocation } from 'react-router'
+import { Link, matchPath, Route, Routes, useLocation } from 'react-router'
 import { selectCartCount, selectCartTotal } from './app/store'
 import { useShopSelector } from './app/store-hooks'
 import {
@@ -13,6 +13,7 @@ import { CatalogPage } from './features/browse/CatalogPage'
 import { MissingPage, ProductPage } from './features/browse/ProductPage'
 import { CartPage } from './features/cart/CartPage'
 import { OrderPage } from './features/orders/OrderPage'
+import { useLiveStock } from './hooks/useLiveStock'
 
 export default function App({
   mockScenarios = false,
@@ -24,6 +25,10 @@ export default function App({
   const main = useRef<HTMLElement>(null)
   const count = useShopSelector(selectCartCount)
   const total = useShopSelector(selectCartTotal)
+  const watchesStock = ['/', '/cart', '/checkout', '/products/:id'].some(
+    (path) => matchPath(path, pathname),
+  )
+  useLiveStock(mockScenarios && watchesStock)
 
   useEffect(() => {
     if (previousPath.current !== pathname) {
