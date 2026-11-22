@@ -1,0 +1,17 @@
+# Shopflow UI standards
+
+These rules apply to Shopflow UI work. Introduce the Tailwind setup during D1-1. See the [implementation plan](docs/plans/shopflow-codex.plan.md).
+
+1. **Native semantics and reusable UI:** use semantic HTML with React and Tailwind. Native `button`, `input`, `label`, `form`, headings, landmarks and links are encouraged. Do not carry over the old ban on HTML elements. Create small shared Button, Input, Field, Alert and loading/empty/error components when repetition warrants them. No Ant Design, Ant icons, ConfigProvider or replacement styled component suite.
+2. **Utility-first styling:** Tailwind utilities are the default. No Sass/SCSS, BEM requirement or mandatory per-component stylesheet. Keep exceptional custom CSS small and documented. Remove old Ant/SCSS dependencies and imports only if present and only within Shopflow; do not remove a dependency needed elsewhere in a shared workspace.
+3. **One theme source:** use `src/styles/app.css`, starting with `@import "tailwindcss";`, plus CSS-first `@theme` variables for semantic brand/surface/text/border/status colors and relevant fonts/shadows. Consume generated semantic utilities; no scattered hex colors or arbitrary color values in TSX. Define accessible defaults; dark mode and a theme editor are not required.
+4. **Responsive layout:** mobile-first Tailwind Grid/Flex and gap utilities, using default responsive variants where practical. No Ant Row/Col, forced declarations at every breakpoint or SCSS media-query scheme. Test narrow/mobile, tablet and desktop; prevent overflow and maintain readable forms and usable controls.
+5. **Class safety and consistency:** full static class strings or typed variant maps; do not construct classes such as `bg-${color}-500`. Avoid conflicting utilities and unnecessary arbitrary values. Prefer reusable components over repeated long class lists. Inline styles are exceptional for runtime geometry, such as virtualizer offsets, and must be explained; no inline colors or general inline layout styling.
+6. **Accessibility:** visible focus, meaningful labels/alt text, keyboard access, sufficient contrast, announced validation errors and status messages, sensible focus on route/error changes, reduced-motion support and correct disabled/busy behavior. Tailwind supplies styling, so these behaviors must be implemented explicitly. Prefer simple native controls over custom widgets.
+7. **Verification:** consistent loading/empty/error/success states, image fallbacks and mobile layouts. Review keyboard flow and responsive behavior after UI changes; audit home, cart and login against the assignment threshold. Do not remove focus outlines without an accessible replacement.
+
+### Tailwind integration
+
+Use Tailwind v4 with its Vite plugin, subject to actual dependency/browser compatibility checks. Install `tailwindcss` and `@tailwindcss/vite` inside the app with the existing package manager, add `tailwindcss()` alongside the existing React Vite plugin, and import `src/styles/app.css` once from the React entry. Preserve existing Vite configuration. Do not use the old v3 `tailwindcss init -p` setup or add redundant PostCSS configuration. Use a compatible locked version and document it.
+
+Remove Vite demo styles and unused starter assets only after the new entry and shell work. Keep `index.html`, its mount node and the React root. Do not add `src/theme/themeToken.ts`, `themeConfig.ts`, `_variables.scss`, or a theme provider for Tailwind.
