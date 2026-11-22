@@ -22,6 +22,12 @@ A product has string fields `id`, `name` and `imageUrl`, nonnegative integer cen
 - Each order belongs to the demo user. Its status is `queued` for the first two seconds, `processing` until five seconds have passed, then `completed`. The client accepts `failed` for future failure scenarios. Updating reserved stock and writing the ledger are part of the same mock operation.
 - Login 400 field details use `email` and `password` with value `INVALID`. A stock conflict returns code `OUT_OF_STOCK` and details `{ productId, available }`, where `available` is a string containing the available quantity.
 
+## Checkout retries
+
+The UI saves one UUID and the exact order body to `shopflow.checkout.v1` in tab session storage before sending a new order. The mock keeps the corresponding order and key in its own ledger. With the same tab and mock session, a lost response can be retried after signing in again, even if the original order already reserved the remaining stock. The cart is updated only after a validated 201. A definitive 400 or 409 unlocks the cart for corrections. A network error, 500, malformed success, or 401 preserves the original request for manual retry. Mutations do not retry automatically.
+
+The cart uses `shopflow.cart.v1` in local storage. Clearing the mock ledger or the pending intent during an unresolved order can remove the recovery guarantee. Keep both tab storage records until checkout resolves. This demo's guarantee is scoped to the tab session and the same account.
+
 ## Reproduce scenarios
 
 Enable browser mocks in development as described in the [README](../README.md), then try this in the dev page console.

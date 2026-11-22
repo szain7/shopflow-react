@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams, useSearchParams } from 'react-router'
+import { useShopStore } from '../../app/store-hooks'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { BackToTop } from './BackToTop'
 import { actionClass, BrowseMessage, RetryMessage } from './BrowseMessage'
@@ -11,6 +12,7 @@ import {
   readScenario,
 } from './browse-queries'
 import { withSearch } from './catalog-url'
+import { AddToCart } from '../cart/AddToCart'
 
 export function MissingPage() {
   useDocumentTitle('Page not found | Shopflow')
@@ -36,8 +38,9 @@ function ProductContent({
 }) {
   const [search] = useSearchParams()
   const scenario = readScenario(search, mockScenarios)
+  const { api } = useShopStore()
   const query = useQuery(
-    productQuery(id, scenario === 'race' ? undefined : scenario),
+    productQuery(api, id, scenario === 'race' ? undefined : scenario),
   )
   const missing = query.isError && isMissingProduct(query.error)
   const title = query.isSuccess
@@ -60,6 +63,7 @@ function ProductContent({
               {title}
             </h1>
             <PriceAndStock price={query.data.price} stock={query.data.stock} />
+            <AddToCart product={query.data} />
             <p className="sr-only" role="status">
               Product details loaded.
             </p>

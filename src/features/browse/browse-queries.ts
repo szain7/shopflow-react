@@ -1,9 +1,9 @@
 import { queryOptions } from '@tanstack/react-query'
-import { ApiRequestError, createApiClient } from '../../api/client'
-import type { ProductMockScenario } from '../../api/client'
+import { ApiRequestError } from '../../api/client'
+import type { createApiClient, ProductMockScenario } from '../../api/client'
 import type { CatalogFilters } from './catalog-url'
 
-const api = createApiClient()
+type Api = ReturnType<typeof createApiClient>
 const staleTime = 30_000
 
 export function readScenario(params: URLSearchParams, enabled: boolean) {
@@ -21,6 +21,7 @@ export function readScenario(params: URLSearchParams, enabled: boolean) {
 }
 
 export function catalogQuery(
+  api: Api,
   filters: CatalogFilters,
   scenario?: ProductMockScenario | 'race',
 ) {
@@ -41,7 +42,11 @@ export function catalogQuery(
   })
 }
 
-export function productQuery(id: string, mockScenario?: ProductMockScenario) {
+export function productQuery(
+  api: Api,
+  id: string,
+  mockScenario?: ProductMockScenario,
+) {
   return queryOptions({
     queryKey: ['products', 'detail', id, mockScenario],
     queryFn: ({ signal }) => api.getProduct(id, { signal, mockScenario }),

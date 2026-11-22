@@ -1,6 +1,6 @@
 # Shopflow
 
-Shopflow is a developer gear storefront built for The Bug Bazaar assignment. The catalog supports shareable filters, pagination, and product details. The npm package and project folder are named `shopflow-react`.
+Shopflow is a developer gear storefront built for The Bug Bazaar assignment. Browse the catalog, build a cart, and place a training order with the local mocks. The npm package and project folder are named `shopflow-react`.
 
 ## Run locally
 
@@ -15,6 +15,8 @@ For the local catalog without a backend, copy `.env.example` to `.env.local`, se
 `VITE_DISPLAY_CURRENCY` controls the price display currency code and defaults to USD. The API still sends integer cents. For a deployed build, serve the shared `/api` endpoints on the same origin and configure the host to send client routes such as `/products/product-0002` to `index.html`.
 
 See the [API contract](docs/api-contract.md#reproduce-scenarios) for links that reproduce catalog and detail states.
+
+To try checkout, add a product, open the cart, and select **Checkout**. Sign in with `learner@example.test` and `shopflow-demo` when using mocks. The [authentication guide](docs/auth.md) explains what survives a reload.
 
 ## Scripts
 

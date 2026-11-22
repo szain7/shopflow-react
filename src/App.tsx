@@ -3,8 +3,16 @@ import { useEffect, useRef } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router'
 import { selectCartCount, selectCartTotal } from './app/store'
 import { useShopSelector } from './app/store-hooks'
+import {
+  AccountPage,
+  LoginPage,
+  RequireSession,
+  SessionLinks,
+} from './features/auth/AuthPages'
 import { CatalogPage } from './features/browse/CatalogPage'
 import { MissingPage, ProductPage } from './features/browse/ProductPage'
+import { CartPage } from './features/cart/CartPage'
+import { OrderPage } from './features/orders/OrderPage'
 
 export default function App({
   mockScenarios = false,
@@ -41,9 +49,19 @@ export default function App({
           >
             Shopflow
           </Link>
-          <span>
-            Cart ({count}) {formatPrice(total)}
-          </span>
+          <nav
+            aria-label="Shop navigation"
+            className="flex flex-wrap items-center gap-x-4 gap-y-1"
+          >
+            <Link
+              className="rounded-sm py-2 font-semibold text-brand focus-visible:outline-2 focus-visible:outline-brand"
+              to="/cart"
+            >
+              Cart ({count}){' '}
+              <span className="whitespace-nowrap">{formatPrice(total)}</span>
+            </Link>
+            <SessionLinks />
+          </nav>
         </div>
       </header>
       <main
@@ -61,6 +79,13 @@ export default function App({
             path="/products/:id"
             element={<ProductPage mockScenarios={mockScenarios} />}
           />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route element={<RequireSession />}>
+            <Route path="/checkout" element={<CartPage checkout />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/orders/:id" element={<OrderPage />} />
+          </Route>
           <Route path="*" element={<MissingPage />} />
         </Routes>
       </main>

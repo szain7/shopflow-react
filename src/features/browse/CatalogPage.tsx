@@ -12,6 +12,8 @@ import { browseError, catalogQuery, readScenario } from './browse-queries'
 import { catalogParams, readCatalogFilters, withSearch } from './catalog-url'
 import type { CatalogFilters } from './catalog-url'
 import { productPageSize } from '../../api/schemas'
+import { useShopStore } from '../../app/store-hooks'
+import { AddToCart } from '../cart/AddToCart'
 
 const defaults = readCatalogFilters(new URLSearchParams())
 const fieldClass =
@@ -47,7 +49,8 @@ function CatalogResults({
   filters: CatalogFilters
   scenario: Scenario
 }) {
-  const query = useQuery(catalogQuery(filters, scenario))
+  const { api } = useShopStore()
+  const query = useQuery(catalogQuery(api, filters, scenario))
 
   if (query.isPending) return <BrowseMessage>Loading products…</BrowseMessage>
   if (query.isError) {
@@ -98,6 +101,7 @@ function CatalogResults({
                   </Link>
                 </h2>
                 <PriceAndStock price={product.price} stock={product.stock} />
+                <AddToCart product={product} />
               </div>
             </li>
           ))}
