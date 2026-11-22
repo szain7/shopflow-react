@@ -1,0 +1,24 @@
+name: Shopflow CI
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  app:
+    name: Application checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint:app
+      - run: npm run typecheck
+      - run: npm run test:run
+      - run: npm run build
