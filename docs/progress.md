@@ -114,15 +114,29 @@ Phase 0 has no remaining work and no new commit.
 
 [Harden guide](ai/harden.md)
 
-| ID   | Status  | Evidence | Remaining work                                                  | Commit |
-| ---- | ------- | -------- | --------------------------------------------------------------- | ------ |
-| D4-1 | Pending | —        | Audit keyboard, screen-reader and Lighthouse accessibility      | —      |
-| D4-2 | Pending | —        | Measure and fix two performance bottlenecks                     | —      |
-| D4-3 | Pending | —        | Verify 5,000-product browsing and document optimization choices | —      |
-| D4-4 | Pending | —        | Implement and test live stock recovery and cleanup              | —      |
-| D4-5 | Pending | —        | Run at least 15 meaningful behavior tests                       | —      |
-| D4-6 | Pending | —        | Configure PR CI and verify required checks                      | —      |
-| D4-7 | Pending | —        | Add render error recovery and monitoring notes                  | —      |
+| ID   | Status   | Evidence                                                                                                         | Remaining work                                                   | Commit                                         |
+| ---- | -------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------- |
+| D4-1 | Partial  | Lighthouse 100 on catalog, populated cart, and login, plus keyboard and accessibility-tree verification          | Standalone screen-reader speech check pending                    | D4-1 Record local accessibility audits         |
+| D4-2 | Complete | Compared the two slowest mock stages before and after with the same workload. See [performance](performance.md). | —                                                                | D4-2 Reduce measured catalog handler work      |
+| D4-3 | Complete | Browser verified bounded rendering on early and late pages of the 5,000-product catalog.                         | —                                                                | D4-3 Verify bounded paging after stock changes |
+| D4-4 | Complete | Browser live update reached the cart. Tests cover validation, backoff, reconciliation, and StrictMode cleanup.   | —                                                                | D4-4 Add reconnecting mock stock feed          |
+| D4-5 | Complete | 63 passing tests retain cart, hooks, login, history, race, 401, checkout, conflict, and replay coverage.         | —                                                                | D4-5 Cover live updates and cleanup            |
+| D4-6 | Partial  | PR workflow added. Clean local install and all workflow commands passed. See [CI setup](ci.md).                  | Hosted PR run and required status check setup remain unverified. | D4-6 Add pull request application checks       |
+| D4-7 | Complete | Render failure test verified focus, sanitized logging, and recovery. See [monitoring](monitoring.md).            | —                                                                | D4-7 Add sanitized render recovery             |
+
+### Day 4 review
+
+- Confirmed the same warm-up, request sequence, fixture and timed mock-handler stages. Browser card counts are separate from handler timings.
+- Stock changes shift the in-stock page boundary without introducing duplicate items or stale totals. A regression test forces a missed change and verifies that reconnect refetches active REST queries.
+- Feed opening also refetches stock on view re-entry. Invalid frames cannot trigger refresh, and StrictMode cleanup closes the obsolete socket and cancels retry timers.
+- Verified the sanitized recovery test and matched all workflow paths and scripts to the root lockfile and Node 26.13.0.
+
+### Day 4 validation
+
+- App lint, strict type checking, formatting, production build, and 63 tests passed. A clean temporary install also passed every command listed in the PR workflow.
+- [Accessibility results](accessibility.md) record Lighthouse snapshot scores and the keyboard and browser accessibility-tree checks. Chrome completed mobile checkout and displayed a live stock warning without altering the requested cart quantity.
+- Repository-wide lint still reports unused variables on lines 54 and 161, a constant condition on line 64, and a redeclaration on line 102 in the preserved exercise file. The PR workflow checks app, tests, and tooling.
+- Remote CI, branch rules, deployments, and Git history were untouched. Day 4 is recorded in the seven commits above.
 
 ## Day 5 — Explain
 

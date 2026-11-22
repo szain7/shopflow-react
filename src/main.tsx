@@ -4,6 +4,8 @@ import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router'
 import App from './App'
+import { RenderBoundary } from './app/RenderBoundary'
+import { reportRenderFailure } from './app/render-monitor'
 import { browserStorage, createShopStore } from './app/store'
 import './styles/app.css'
 
@@ -24,12 +26,18 @@ async function bootstrap() {
     browserStorage('localStorage'),
     browserStorage('sessionStorage'),
   )
-  createRoot(container).render(
+  createRoot(container, {
+    // The boundary logs a sanitized event for caught errors.
+    onCaughtError: () => undefined,
+    onUncaughtError: reportRenderFailure,
+  }).render(
     <StrictMode>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
-            <App mockScenarios={mockScenarios} />
+            <RenderBoundary>
+              <App mockScenarios={mockScenarios} />
+            </RenderBoundary>
           </BrowserRouter>
         </QueryClientProvider>
       </Provider>
