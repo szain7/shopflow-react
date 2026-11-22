@@ -163,6 +163,10 @@ export function CatalogPage({ mockScenarios }: { mockScenarios: boolean }) {
     locationKey: key,
     search: filters.search,
   })
+  // A POP can revisit the same key. Discard drafts when leaving their entry.
+  if (draft.locationKey !== key) {
+    setDraft({ locationKey: key, search: filters.search })
+  }
   const value = draft.locationKey === key ? draft.search : filters.search
   const search = value.trim()
   const pendingSearch = search !== filters.search
