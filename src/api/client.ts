@@ -12,8 +12,12 @@ import {
 } from './schemas'
 import type { LoginBody, OrderBody, ProductFilters } from './schemas'
 
+export type ProductMockScenario =
+  'slow' | 'empty' | 'server-error' | 'malformed' | 'invalid-data'
+
 interface RequestOptions {
   signal?: AbortSignal
+  mockScenario?: ProductMockScenario
 }
 interface ClientOptions {
   origin?: string
@@ -117,6 +121,8 @@ export function createApiClient({
     const token = options.auth ? getToken?.() : undefined
     const headers = new Headers({ Accept: 'application/json' })
     try {
+      if (options.mockScenario)
+        headers.set('X-Shopflow-Mock', options.mockScenario)
       if (token) headers.set('Authorization', `Bearer ${token}`)
       if (options.body) headers.set('Content-Type', 'application/json')
       if (options.key !== undefined) headers.set('Idempotency-Key', options.key)

@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+export const productPageSize = 24
+
 export const categories = ['keyboards', 'ducks', 'coffee', 'stickers'] as const
 export const categorySchema = z.enum(categories)
 export const sortSchema = z.enum([

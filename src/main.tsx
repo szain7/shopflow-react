@@ -1,10 +1,14 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router'
 import App from './App'
 import './styles/app.css'
 
 async function bootstrap() {
-  if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS === 'true') {
+  const mockScenarios =
+    import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS === 'true'
+  if (mockScenarios) {
     const { worker } = await import('./mocks/browser')
     await worker.start({ onUnhandledFrame: 'bypass', quiet: true })
   }
@@ -14,7 +18,11 @@ async function bootstrap() {
 
   createRoot(container).render(
     <StrictMode>
-      <App />
+      <QueryClientProvider client={new QueryClient()}>
+        <BrowserRouter>
+          <App mockScenarios={mockScenarios} />
+        </BrowserRouter>
+      </QueryClientProvider>
     </StrictMode>,
   )
 }
