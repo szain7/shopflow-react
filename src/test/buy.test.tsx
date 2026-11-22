@@ -259,6 +259,33 @@ test('an in-flight account request cannot restore private data after logout and 
   }
 })
 
+test('announces local validation and safe server 400 field errors', async () => {
+  const view = open('/login')
+  await view.user.click(screen.getByRole('button', { name: 'Sign in' }))
+  expect(screen.getByLabelText('Email')).toHaveFocus()
+  expect(screen.getByText('Enter your password.')).toBeVisible()
+  server.use(
+    http.post('*/api/login', () =>
+      HttpResponse.json(
+        {
+          error: {
+            code: 'INVALID_LOGIN',
+            message: 'sensitive server text',
+            details: { password: 'INVALID' },
+          },
+        },
+        { status: 400 },
+      ),
+    ),
+  )
+  await signIn(view.user)
+  expect(
+    await screen.findByText('Check your password and try again.'),
+  ).toBeVisible()
+  expect(screen.getByLabelText('Password')).toHaveFocus()
+  expect(screen.queryByText('sensitive server text')).not.toBeInTheDocument()
+})
+
 test('guards duplicate login submits and handles incorrect credentials', async () => {
   const release = Promise.withResolvers<void>()
   let calls = 0
@@ -476,3 +503,29 @@ test.each([false, true])(
     }
   },
 )
+
+test('offers a safe retry on server failure and distinguishes a missing order', async () => {
+  const runtime = authenticated()
+  server.use(
+    http.get('*/api/orders/:id', () =>
+      HttpResponse.json(
+        {
+          error: { code: 'SERVER_ERROR', message: 'private server trace' },
+        },
+        { status: 500 },
+      ),
+    ),
+  )
+  const view = open('/orders/missing', runtime)
+  expect(
+    await screen.findByText(
+      'The service could not complete the request. Please try again.',
+    ),
+  ).toBeVisible()
+  expect(screen.queryByText('private server trace')).not.toBeInTheDocument()
+  server.resetHandlers()
+  await view.user.click(screen.getByRole('button', { name: 'Try again' }))
+  expect(
+    await screen.findByRole('heading', { name: 'Order not found' }),
+  ).toBeVisible()
+})
