@@ -4,15 +4,15 @@ Baseline recorded 22 November 2026. See the [implementation plan](plans/shopflow
 
 ## Phase 0 — Complete
 
-| Work | Status | Evidence |
-| --- | --- | --- |
-| Inspect repository and verify baseline | Complete | Findings and validation below |
-| Reconcile plan with checkout | Complete | [Updated plan](plans/shopflow-codex.plan.md) |
-| Establish repository and UI guidance | Complete | [AGENTS.md](../AGENTS.md) and [UI.md](../UI.md) |
+| Work                                    | Status   | Evidence                                                         |
+| --------------------------------------- | -------- | ---------------------------------------------------------------- |
+| Inspect repository and verify baseline  | Complete | Findings and validation below                                    |
+| Reconcile plan with checkout            | Complete | [Updated plan](plans/shopflow-codex.plan.md)                     |
+| Establish repository and UI guidance    | Complete | [AGENTS.md](../AGENTS.md) and [UI.md](../UI.md)                  |
 | Add feature guides and review checklist | Complete | Day links below and [React review checklist](ai/react-review.md) |
-| Track every assignment task | Complete | Day 1–5 tables below |
+| Track every assignment task             | Complete | Day 1–5 tables below                                             |
 
-Phase 0 has no remaining work and no new commit. The next task is D1-1.
+Phase 0 has no remaining work and no new commit.
 
 ### Repository baseline
 
@@ -33,64 +33,78 @@ Phase 0 has no remaining work and no new commit. The next task is D1-1.
 
 [Foundation guide](ai/foundation.md)
 
-| ID | Status | Evidence | Remaining work | Commit |
-| --- | --- | --- | --- | --- |
-| D1-1 | Pending | Phase 0 inspection and guidance complete | Apply Shopflow branding and Tailwind shell. Set up formatting, lint, environment guidance and README | — |
-| D1-2 | Pending | — | Document and mock six endpoints with deterministic data and contract tests | — |
-| D1-3 | Pending | — | Migrate to strict TypeScript and verify type checks | — |
-| D1-4 | Pending | — | Build and test the validated HTTP client | — |
+| ID   | Status   | Evidence                                                                                            | Remaining work                                                     | Commit                                              |
+| ---- | -------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------- |
+| D1-1 | Complete | Shopflow shell, Tailwind, README, environment example, and Chrome smoke check                       | Whole-repository lint still reports four preserved practice errors | D1-1 Build the Shopflow Tailwind shell              |
+| D1-2 | Complete | Six MSW handlers, 5,000 products, all required statuses tested, and [API contract](api-contract.md) | —                                                                  | D1-2 Implement the documented mock API              |
+| D1-3 | Complete | Strict typecheck, type-aware app lint, and formatting check pass                                    | —                                                                  | D1-3 Enable strict TypeScript and typed linting     |
+| D1-4 | Complete | Zod client tests cover auth, HTTP failures, invalid responses, network errors, and cancellation     | —                                                                  | D1-4 Validate requests through the typed API client |
+
+### Day 1 review
+
+- The API client now rejects invalid mutation bodies and unsafe detail IDs before fetch. This prevents invalid submissions and stops dot segments from resolving to another route. It also classifies a failed successful-response body stream as a network error while malformed JSON remains a validation failure.
+- Reviewed shell landmarks, keyboard focus, responsive styles, strict types, mock storage, and sanitized API failures. Feature hooks, lists, and screen-level data states begin in later tasks.
+
+### Day 1 validation
+
+- `npm run lint:app`, `npm run typecheck`, `npm run format:check`, and `npm run build` passed. `npm run test:run` passed 19 tests across four files.
+- `npm run lint` reports four pre-existing errors in `src/practice/practice.js`: unused variables at lines 54 and 161, a constant condition at 64, and a redeclaration at 102. The old app unused-variable error was removed with the starter screen. Exercise files are unchanged.
+- Headless Chrome verified the skip link receives keyboard focus and the shell fits at 360, 768 and 1280 px. With the mock flag enabled, development returned 5,000 products and a forced 500. The production preview rendered Shopflow without registering a service worker.
+- `npm ci` passed in a clean temporary directory with the repository manifests. Windows blocked replacing loaded native dependencies in the working checkout. `npm install` restored the checkout's dependency tree. The original direct package versions are unchanged.
+- `npm audit` reports three moderate findings tied to the existing ESLint development-tool dependency chain. `npm audit --omit=dev` reports zero vulnerabilities.
+- Day 1 is recorded in the four task-prefixed commits above. No pushes were made. The next task is D2-1 when authorized.
 
 ## Day 2 — Browse
 
 [Browse guide](ai/browse.md)
 
-| ID | Status | Evidence | Remaining work | Commit |
-| --- | --- | --- | --- | --- |
-| D2-1 | Pending | — | Build product grid, details and missing-route states | — |
-| D2-2 | Pending | — | Add URL filters, sorting, count and paging | — |
-| D2-3 | Pending | — | Cover loading, empty, error and success states | — |
-| D2-4 | Pending | — | Verify cancellation and listener cleanup | — |
-| D2-5 | Pending | — | Reuse at least two typed hooks | — |
-| D2-6 | Pending | — | Test out-of-order search responses | — |
+| ID   | Status  | Evidence | Remaining work                                       | Commit |
+| ---- | ------- | -------- | ---------------------------------------------------- | ------ |
+| D2-1 | Pending | —        | Build product grid, details and missing-route states | —      |
+| D2-2 | Pending | —        | Add URL filters, sorting, count and paging           | —      |
+| D2-3 | Pending | —        | Cover loading, empty, error and success states       | —      |
+| D2-4 | Pending | —        | Verify cancellation and listener cleanup             | —      |
+| D2-5 | Pending | —        | Reuse at least two typed hooks                       | —      |
+| D2-6 | Pending | —        | Test out-of-order search responses                   | —      |
 
 ## Day 3 — Buy
 
 [Buy guide](ai/buy.md)
 
-| ID | Status | Evidence | Remaining work | Commit |
-| --- | --- | --- | --- | --- |
-| D3-1 | Pending | — | Set up Redux cart and session | — |
-| D3-2 | Pending | — | Add persistent cart and protected, idempotent checkout | — |
-| D3-3 | Pending | — | Add login, logout and protected routes | — |
-| D3-4 | Pending | — | Map API errors to safe messages | — |
-| D3-5 | Pending | — | Verify cache reuse and stock reconciliation | — |
+| ID   | Status  | Evidence | Remaining work                                         | Commit |
+| ---- | ------- | -------- | ------------------------------------------------------ | ------ |
+| D3-1 | Pending | —        | Set up Redux cart and session                          | —      |
+| D3-2 | Pending | —        | Add persistent cart and protected, idempotent checkout | —      |
+| D3-3 | Pending | —        | Add login, logout and protected routes                 | —      |
+| D3-4 | Pending | —        | Map API errors to safe messages                        | —      |
+| D3-5 | Pending | —        | Verify cache reuse and stock reconciliation            | —      |
 
 ## Day 4 — Harden
 
 [Harden guide](ai/harden.md)
 
-| ID | Status | Evidence | Remaining work | Commit |
-| --- | --- | --- | --- | --- |
-| D4-1 | Pending | — | Audit keyboard, screen-reader and Lighthouse accessibility | — |
-| D4-2 | Pending | — | Measure and fix two performance bottlenecks | — |
-| D4-3 | Pending | — | Verify 5,000-product browsing and document optimization choices | — |
-| D4-4 | Pending | — | Implement and test live stock recovery and cleanup | — |
-| D4-5 | Pending | — | Run at least 15 meaningful behavior tests | — |
-| D4-6 | Pending | — | Configure PR CI and verify required checks | — |
-| D4-7 | Pending | — | Add render error recovery and monitoring notes | — |
+| ID   | Status  | Evidence | Remaining work                                                  | Commit |
+| ---- | ------- | -------- | --------------------------------------------------------------- | ------ |
+| D4-1 | Pending | —        | Audit keyboard, screen-reader and Lighthouse accessibility      | —      |
+| D4-2 | Pending | —        | Measure and fix two performance bottlenecks                     | —      |
+| D4-3 | Pending | —        | Verify 5,000-product browsing and document optimization choices | —      |
+| D4-4 | Pending | —        | Implement and test live stock recovery and cleanup              | —      |
+| D4-5 | Pending | —        | Run at least 15 meaningful behavior tests                       | —      |
+| D4-6 | Pending | —        | Configure PR CI and verify required checks                      | —      |
+| D4-7 | Pending | —        | Add render error recovery and monitoring notes                  | —      |
 
 ## Day 5 — Explain
 
 [Explain guide](ai/explain.md)
 
-| ID | Status | Evidence | Remaining work | Commit |
-| --- | --- | --- | --- | --- |
-| D5-1 | Pending | — | Document actual architecture and state ownership | — |
-| D5-2 | Pending | — | Identify three implemented patterns | — |
-| D5-3 | Pending | — | Diagram the conceptual order queue and workers | — |
-| D5-4 | Pending | — | Write the six-term glossary | — |
-| D5-5 | Pending | — | Collect genuine partner architecture feedback | — |
-| D5-6 | Pending | — | Complete genuine partner PR reviews and responses | — |
-| D5-7 | Pending | — | Record actual AI use and a caught mistake | — |
-| D5-8 | Pending | — | Collect personal tracker ratings and next steps | — |
-| D5-9 | Pending | — | Finish PR, verify CI and deliver walkthrough | — |
+| ID   | Status  | Evidence | Remaining work                                    | Commit |
+| ---- | ------- | -------- | ------------------------------------------------- | ------ |
+| D5-1 | Pending | —        | Document actual architecture and state ownership  | —      |
+| D5-2 | Pending | —        | Identify three implemented patterns               | —      |
+| D5-3 | Pending | —        | Diagram the conceptual order queue and workers    | —      |
+| D5-4 | Pending | —        | Write the six-term glossary                       | —      |
+| D5-5 | Pending | —        | Collect genuine partner architecture feedback     | —      |
+| D5-6 | Pending | —        | Complete genuine partner PR reviews and responses | —      |
+| D5-7 | Pending | —        | Record actual AI use and a caught mistake         | —      |
+| D5-8 | Pending | —        | Collect personal tracker ratings and next steps   | —      |
+| D5-9 | Pending | —        | Finish PR, verify CI and deliver walkthrough      | —      |
