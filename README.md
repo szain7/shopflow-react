@@ -1,16 +1,34 @@
-# React + Vite
+# Shopflow
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Shopflow is a developer gear storefront built for The Bug Bazaar assignment. Day 1 provides an accessible shell, a typed API client, and a reproducible mock backend. The npm package and project folder are named `shopflow-react`.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Clone the repository and open the `shopflow-react` folder.
+2. Use Node **26.13.0** from `.nvmrc`. The setup was verified with npm **11.20.0**.
+3. Run `npm ci`, then `npm run dev`. Open the local URL Vite prints.
 
-## React Compiler
+### Public environment variable
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Copy `.env.example` to `.env.local` if you want to enable the browser mocks. Set `VITE_ENABLE_MOCKS=true` and restart Vite. It defaults to off and only works with the development server. The test runner starts its own mocks automatically. Keep secrets out of all `VITE_` variables because Vite exposes them to the browser.
 
-## Expanding the ESLint configuration
+The Day 1 shell makes no API calls. To try the mock endpoints from the browser console, follow the examples in the [API contract](docs/api-contract.md).
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Scripts
+
+| Command                 | Purpose                                                             |
+| ----------------------- | ------------------------------------------------------------------- |
+| `npm run dev`           | Start the Vite development server                                   |
+| `npm run build`         | Build the production shell into `dist`                              |
+| `npm run preview`       | Serve the production build locally after building                   |
+| `npm run lint`          | Lint the whole repository, including the four known exercise errors |
+| `npm run lint:app`      | Lint the app, tests, and tooling                                    |
+| `npm run typecheck`     | Strictly check application, test, and TypeScript tooling files      |
+| `npm run format`        | Apply Prettier to project files in scope                            |
+| `npm run format:check`  | Check formatting without writing files                              |
+| `npm test`              | Run Vitest in watch mode during local development                   |
+| `npm run test:run`      | Run the test suite once                                             |
+| `npm run practice`      | Run the original Week 1 practice script                             |
+| `npm run practice:test` | Run the original practice script previously mapped to `npm test`    |
+
+PowerShell users can use `npm.cmd` if their execution policy blocks `npm.ps1`. See [progress](docs/progress.md) for validation and [decisions](docs/decisions.md) for trade-offs.
