@@ -1,5 +1,17 @@
 # Shopflow AI-use notes
 
+## D5-7 submission evidence
+
+| Actual prompt excerpt                                                   | Kept                                                   | Changed and why                                                                                                                                                   |
+| ----------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| “Store applied filters in the URL.”                                     | React Router owns applied filters and pagination.      | Search drafts stayed local until applied. The Day 2 review also discards unsubmitted text on history navigation so Back and Forward restore the actual URL state. |
+| “Reuse the same idempotency key for retries of the same logical order.” | Checkout persists a key and order body before posting. | The lost-response test now reconstructs the app and mock ledger after reload. This verifies that replay works after the server has already reserved stock.        |
+| “Measure catalog performance before making optimizations.”              | Same-workload measurements for the mock handler.       | Reused stable sort orders and materialized only the requested page because sorting and stock-row preparation were the two slowest measured stages.                |
+
+**Caught mistake:** The AI-generated sign-out handler and protected-route guard both tried to navigate. The test exposed the conflict. The fix let the route guard own the redirect after sign-out. See the Day 3 record below and the [login/logout test](../src/test/buy.test.tsx).
+
+**Personal input pending:** What is one task or decision you would keep under your own control, and why? Add your own answer here.
+
 ## Day 1
 
 | Prompt excerpt                                                                                               | Work retained                                                                | What changed and why                                                                                                                                                                                  |
