@@ -37,7 +37,14 @@ export function RetryMessage({
       <button
         className={actionClass}
         type="button"
-        onClick={onRetry}
+        onClick={(event) => {
+          if (document.activeElement === event.currentTarget) {
+            document
+              .getElementById('main-content')
+              ?.focus({ preventScroll: true })
+          }
+          onRetry()
+        }}
         disabled={retrying}
       >
         {retrying ? 'Retrying…' : 'Try again'}

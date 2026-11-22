@@ -3,13 +3,12 @@ import {
   categorySchema,
   loginBodySchema,
   orderBodySchema,
+  productPageSize,
   sortSchema,
 } from '../api/schemas'
 import type { OrderBody, Product } from '../api/schemas'
 import { inventory } from './inventory'
 import { createMockState, demoCredentials, demoUser } from './state'
-
-const pageSize = 24
 
 function error(
   status: number,
@@ -83,13 +82,21 @@ export function createHandlers(state: ReturnType<typeof createMockState>) {
         })
 
       return HttpResponse.json({
-        items: items.slice((page - 1) * pageSize, page * pageSize),
+        items: items.slice(
+          (page - 1) * productPageSize,
+          page * productPageSize,
+        ),
         total: items.length,
       })
     }),
     http.get('*/api/products/:id', async ({ params, request }) => {
       const override = await scenarioResponse(request)
       if (override) return override
+      const scenario = request.headers.get('X-Shopflow-Mock')
+      if (scenario === 'server-error')
+        return error(500, 'PRODUCT_UNAVAILABLE', 'Demo product failure.')
+      if (scenario === 'empty')
+        return error(404, 'PRODUCT_NOT_FOUND', 'Product does not exist.')
       const product =
         typeof params.id === 'string' ? inventory.get(params.id) : undefined
       if (!product)

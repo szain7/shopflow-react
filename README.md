@@ -1,6 +1,6 @@
 # Shopflow
 
-Shopflow is a developer gear storefront built for The Bug Bazaar assignment. Day 1 provides an accessible shell, a typed API client, and a reproducible mock backend. The npm package and project folder are named `shopflow-react`.
+Shopflow is a developer gear storefront built for The Bug Bazaar assignment. The catalog supports shareable filters, pagination, and product details. The npm package and project folder are named `shopflow-react`.
 
 ## Run locally
 
@@ -8,11 +8,13 @@ Shopflow is a developer gear storefront built for The Bug Bazaar assignment. Day
 2. Use Node **26.13.0** from `.nvmrc`. The setup was verified with npm **11.20.0**.
 3. Run `npm ci`, then `npm run dev`. Open the local URL Vite prints.
 
-### Public environment variable
+### Public environment variables
 
-Copy `.env.example` to `.env.local` if you want to enable the browser mocks. Set `VITE_ENABLE_MOCKS=true` and restart Vite. It defaults to off and only works with the development server. The test runner starts its own mocks automatically. Keep secrets out of all `VITE_` variables because Vite exposes them to the browser.
+For the local catalog without a backend, copy `.env.example` to `.env.local`, set `VITE_ENABLE_MOCKS=true`, and restart Vite. Mocks are off by default and only work with the development server. The test runner starts its own mocks automatically. Keep secrets out of all `VITE_` variables because Vite exposes them to the browser.
 
-The Day 1 shell makes no API calls. To try the mock endpoints from the browser console, follow the examples in the [API contract](docs/api-contract.md).
+`VITE_DISPLAY_CURRENCY` controls the price display currency code and defaults to USD. The API still sends integer cents. For a deployed build, serve the shared `/api` endpoints on the same origin and configure the host to send client routes such as `/products/product-0002` to `index.html`.
+
+See the [API contract](docs/api-contract.md#reproduce-scenarios) for links that reproduce catalog and detail states.
 
 ## Scripts
 

@@ -173,6 +173,40 @@ test('discards an uncommitted search on Back and Forward', async () => {
 })
 
 test.each([
+  ['/?mock=empty', 'No products match your filters.'],
+  ['/?mock=slow', 'Loading products…'],
+  ['/products/product-0002?mock=slow', 'Loading product…'],
+  ['/products/product-0002?mock=empty', 'This product is unavailable.'],
+])('announces the reproducible state for %s', async (url, message) => {
+  open(url, true)
+  expect(await screen.findByText(message)).toHaveAttribute('role', 'status')
+})
+
+test.each([
+  ['/?mock=server-error', 'Shopflow'],
+  ['/products/product-0002?mock=malformed', 'Debug Duck 0001'],
+])('announces a safe error and retries %s', async (url, heading) => {
+  const { user } = open(url, true)
+  await screen.findByRole('alert')
+  const product = inventory.get('product-0002')
+  const detail = url.includes('/products/')
+  server.use(
+    http.get(detail ? '*/api/products/:id' : '*/api/products', () =>
+      HttpResponse.json(detail ? product : { items: [], total: 0 }),
+    ),
+  )
+  screen.getByRole('button', { name: 'Try again' }).focus()
+  await user.keyboard('{Enter}')
+  if (!detail)
+    expect(
+      await screen.findByText('No products match your filters.'),
+    ).toBeVisible()
+  expect(await screen.findByRole('heading', { name: heading })).toBeVisible()
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  expect(screen.getByRole('main')).toHaveFocus()
+})
+
+test.each([
   ['/products/missing', 'Product not found', 'Back to products'],
   ['/missing/page', 'Page not found', 'Browse products'],
 ])('offers a return path from %s', async (url, heading, link) => {

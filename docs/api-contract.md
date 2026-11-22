@@ -31,7 +31,18 @@ await (await fetch('/api/products?page=1')).json()
 await fetch('/api/products', { headers: { 'X-Shopflow-Mock': 'server-error' } })
 ```
 
-The `X-Shopflow-Mock` header supports `server-error` (500, list only), `empty` (list only), `slow` (600 ms delay on list or detail), `malformed` (broken JSON on list or detail) and `invalid-data` (wrong schema on list or detail). Start a slow search followed by a normal request to reproduce out-of-order arrivals.
+The `X-Shopflow-Mock` header supports `server-error` (500), `empty` (an empty list or product 404), `slow` (600 ms delay), `malformed` (broken JSON), and `invalid-data` (wrong schema). Each applies to list and detail requests.
+
+With development mocks enabled, the browser routes accept the same scenario names in `mock`. Remove the parameter for normal success. A forced failure remains active on retry until the scenario is removed.
+
+| Scenario         | Catalog URL           | Detail URL                                 |
+| ---------------- | --------------------- | ------------------------------------------ |
+| Loading          | `/?mock=slow`         | `/products/product-0002?mock=slow`         |
+| Empty or missing | `/?mock=empty`        | `/products/product-0002?mock=empty`        |
+| Error and retry  | `/?mock=server-error` | `/products/product-0002?mock=server-error` |
+| Success          | `/`                   | `/products/product-0002`                   |
+
+For a race, open `/?mock=race`. Type `duck`, let its request start after the 300 ms debounce, then replace it with `coffee` while the duck request is pending. The mock delays the duck request by 600 ms and serves coffee immediately. The app cancels the obsolete request and only displays results for the current search.
 
 Use a missing product ID for product 404. Submit a malformed login body for 400, or a syntactically valid email and wrong password for 401. Use a missing or invalid bearer token on protected endpoints for 401, and a valid token with a missing order ID for order 404. With valid auth and a new idempotency key, use an empty array for order 400 or request two units of `product-0002` for 409. That product starts with one unit. Ordering one unit changes it to zero. Start a fresh tab or reset the ledger for a repeatable stock test.
 
