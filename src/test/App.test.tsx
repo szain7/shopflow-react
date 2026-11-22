@@ -6,6 +6,7 @@ import {
   cleanup,
   fireEvent,
   render,
+  renderHook,
   screen,
   waitFor,
   within,
@@ -16,6 +17,8 @@ import { StrictMode } from 'react'
 import { Link, MemoryRouter, useLocation, useNavigate } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from '../App'
+import { useDebouncedAction } from '../hooks/useDebouncedAction'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { inventory } from '../mocks/inventory'
 import { server } from './server'
 
@@ -75,6 +78,40 @@ beforeEach(() => {
 afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
+})
+
+test('debounce replaces pending values and clears its timer on unmount', () => {
+  vi.useFakeTimers()
+  try {
+    const action = vi.fn()
+    const { rerender, unmount } = renderHook(
+      ({ value }) => useDebouncedAction(value, true, 300, action),
+      { initialProps: { value: 'd' }, reactStrictMode: true },
+    )
+    vi.advanceTimersByTime(200)
+    rerender({ value: 'duck' })
+    vi.advanceTimersByTime(300)
+    expect(action).toHaveBeenCalledExactlyOnceWith('duck')
+    rerender({ value: 'coffee' })
+    unmount()
+    vi.advanceTimersByTime(300)
+    expect(action).toHaveBeenCalledTimes(1)
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+test('restores the previous document title after route-title cleanup', () => {
+  const previous = document.title
+  const { rerender, unmount } = renderHook(
+    ({ title }) => useDocumentTitle(title),
+    { initialProps: { title: 'Catalog' }, reactStrictMode: true },
+  )
+  expect(document.title).toBe('Catalog')
+  rerender({ title: 'Product' })
+  expect(document.title).toBe('Product')
+  unmount()
+  expect(document.title).toBe(previous)
 })
 
 test('navigates by keyboard, shows formatted product details, and returns to the applied catalog', async () => {
