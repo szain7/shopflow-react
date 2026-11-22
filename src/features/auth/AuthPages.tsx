@@ -187,9 +187,11 @@ export function LoginPage() {
 export function AccountPage() {
   useDocumentTitle('Account | Shopflow')
   const store = useShopStore()
+  const scope = useShopSelector((state) => state.session?.cacheScope)
   const query = useQuery({
-    queryKey: ['private', 'account'],
+    queryKey: ['private', scope, 'account'],
     queryFn: ({ signal }) => store.api.getMe({ signal }),
+    enabled: Boolean(scope),
     staleTime: 0,
     retry: false,
   })

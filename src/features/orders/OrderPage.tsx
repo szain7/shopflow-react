@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router'
-import { useShopStore } from '../../app/store-hooks'
+import { useShopSelector, useShopStore } from '../../app/store-hooks'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import {
   actionClass,
@@ -12,10 +12,12 @@ import { browseError, isMissingProduct } from '../browse/browse-queries'
 export function OrderPage() {
   useDocumentTitle('Order confirmation | Shopflow')
   const store = useShopStore()
+  const scope = useShopSelector((state) => state.session?.cacheScope)
   const { id = '' } = useParams()
   const order = useQuery({
-    queryKey: ['private', 'order', id],
+    queryKey: ['private', scope, 'order', id],
     queryFn: ({ signal }) => store.api.getOrder(id, { signal }),
+    enabled: Boolean(scope),
     staleTime: 0,
     retry: false,
   })

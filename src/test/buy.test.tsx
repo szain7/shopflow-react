@@ -2,6 +2,7 @@
 import '@testing-library/jest-dom/vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -23,6 +24,7 @@ import {
   selectCartTotal,
   sessionActions,
 } from '../app/store'
+import { safeReturnPath } from '../features/auth/return-path'
 import { inventory } from '../mocks/inventory'
 import { createHandlers } from '../mocks/handlers'
 import { createMockState, demoCredentials, demoUser } from '../mocks/state'
@@ -154,6 +156,189 @@ test('adds from the catalog, announces invalid quantities, updates totals, and p
   )
   expect(screen.getByText('Your cart is empty.')).toBeVisible()
   expect(create().store.getState().cart).toEqual([])
+})
+
+test.each([
+  '//elsewhere.test',
+  '/\\elsewhere.test',
+  'https://elsewhere.test',
+  '/login',
+  '/%2felsewhere.test',
+])('rejects unsafe return destination %s', (value) =>
+  expect(safeReturnPath(value)).toBe('/'),
+)
+
+test('returns to protected checkout after login, and logout clears private data', async () => {
+  const view = open('/checkout')
+  expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeVisible()
+  await signIn(view.user)
+  expect(await screen.findByRole('heading', { name: 'Checkout' })).toBeVisible()
+  const session = view.store.getState().session
+  if (!session) throw new Error('Expected signed-in session')
+  expect(create().store.getState().session).toBeNull()
+  expect(localStorage.length + sessionStorage.length).toBe(0)
+  await view.user.click(screen.getByRole('link', { name: 'Account' }))
+  expect(await screen.findByText(demoUser.email)).toBeVisible()
+  const key = ['private', session.cacheScope, 'account']
+  expect(view.client.getQueryData(key)).toBeDefined()
+  await view.user.click(screen.getByRole('button', { name: 'Sign out' }))
+  expect(view.client.getQueryData(key)).toBeUndefined()
+  expect(view.store.getState().session).toBeNull()
+  expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeVisible()
+})
+
+test('a successful sign-in ignores an external return URL and keeps credentials out of storage and app logs', async () => {
+  const logs = [
+    vi.spyOn(console, 'log'),
+    vi.spyOn(console, 'info'),
+    vi.spyOn(console, 'debug'),
+    vi.spyOn(console, 'warn'),
+    vi.spyOn(console, 'error'),
+  ]
+  const view = open('/login?returnTo=%2F%2Felsewhere.test')
+  await signIn(view.user)
+  expect(await screen.findByRole('heading', { name: 'Shopflow' })).toBeVisible()
+  const token = view.store.getState().session?.token
+  expect(token).toBeTruthy()
+  expect(localStorage.length + sessionStorage.length).toBe(0)
+  const output = JSON.stringify(logs.flatMap((log) => log.mock.calls))
+  expect(output).not.toContain(token)
+  expect(output).not.toContain(demoCredentials.password)
+})
+
+test('an in-flight account request cannot restore private data after logout and a new login', async () => {
+  const runtime = authenticated()
+  const previous = runtime.store.getState().session
+  if (!previous) throw new Error('Expected original session')
+  const started = Promise.withResolvers<void>()
+  const aborted = Promise.withResolvers<void>()
+  const release = Promise.withResolvers<void>()
+  const completed = Promise.withResolvers<void>()
+  const nextUser = {
+    id: 'next',
+    name: 'Next Shopper',
+    email: 'next@example.test',
+  }
+  server.use(
+    http.get('*/api/me', async ({ request }) => {
+      if (request.headers.get('Authorization') !== `Bearer ${previous.token}`) {
+        return HttpResponse.json(nextUser)
+      }
+      request.signal.addEventListener('abort', () => aborted.resolve(), {
+        once: true,
+      })
+      started.resolve()
+      await release.promise
+      completed.resolve()
+      return HttpResponse.json(demoUser)
+    }),
+    http.post('*/api/login', () =>
+      HttpResponse.json({ user: nextUser, token: 'next-session' }),
+    ),
+  )
+  const { client, user, store } = open('/account', runtime)
+  try {
+    await started.promise
+    await user.click(screen.getByRole('button', { name: 'Sign out' }))
+    await aborted.promise
+    expect(client.getQueriesData({ queryKey: ['private'] })).toEqual([])
+    await signIn(user)
+    expect(await screen.findByText(nextUser.name)).toBeVisible()
+    await act(async () => {
+      release.resolve()
+      await completed.promise
+    })
+    const next = store.getState().session
+    expect(next?.cacheScope).not.toBe(previous.cacheScope)
+    expect(client.getQueriesData({ queryKey: ['private'] })).toEqual([
+      [['private', next?.cacheScope, 'account'], nextUser],
+    ])
+    expect(screen.queryByText(demoUser.email)).not.toBeInTheDocument()
+  } finally {
+    release.resolve()
+  }
+})
+
+test('guards duplicate login submits and handles incorrect credentials', async () => {
+  const release = Promise.withResolvers<void>()
+  let calls = 0
+  server.use(
+    http.post('*/api/login', async () => {
+      calls++
+      await release.promise
+      return HttpResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'private' } },
+        { status: 401 },
+      )
+    }),
+  )
+  const view = open('/login?returnTo=https%3A%2F%2Felsewhere.test')
+  try {
+    await signIn(view.user, 'wrong-password')
+    const button = screen.getByRole('button', { name: 'Signing in…' })
+    expect(button).toBeDisabled()
+    const form = button.closest('form')
+    if (!form) throw new Error('Missing login form')
+    fireEvent.submit(form)
+    await waitFor(() => expect(calls).toBe(1))
+    release.resolve()
+    expect(
+      await screen.findByText('Email or password is incorrect.'),
+    ).toBeVisible()
+    expect(view.store.getState().session).toBeNull()
+  } finally {
+    release.resolve()
+  }
+})
+
+test('expires the session on a protected 401, drops private cache, and preserves the intended route', async () => {
+  const runtime = create()
+  runtime.store.dispatch(
+    sessionActions.signedIn({ token: 'expired', userId: demoUser.id }),
+  )
+  runtime.client.setQueryData(['private', 'order', 'old'], {
+    id: 'old',
+    status: 'queued',
+  })
+  const view = open('/account', runtime)
+  expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeVisible()
+  expect(view.store.getState().session).toBeNull()
+  expect(view.client.getQueryData(['private', 'order', 'old'])).toBeUndefined()
+  await signIn(view.user)
+  expect(await screen.findByText(demoUser.email)).toBeVisible()
+})
+
+test('public 401 clears only the session that started the request and sends no token', async () => {
+  const { store } = authenticated()
+  const started = Promise.withResolvers<void>()
+  const release = Promise.withResolvers<void>()
+  server.use(
+    http.get('*/api/products', async ({ request }) => {
+      expect(request.headers.has('Authorization')).toBe(false)
+      started.resolve()
+      await release.promise
+      return HttpResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'private' } },
+        { status: 401 },
+      )
+    }),
+  )
+  const stale = store.api.listProducts().catch((error: unknown) => error)
+  try {
+    await started.promise
+    store.dispatch(
+      sessionActions.signedIn({ token: 'new-token', userId: demoUser.id }),
+    )
+    release.resolve()
+    expect(await stale).toMatchObject({ failure: { status: 401 } })
+    expect(store.getState().session?.token).toBe('new-token')
+    await expect(store.api.listProducts()).rejects.toMatchObject({
+      failure: { status: 401 },
+    })
+    expect(store.getState().session).toBeNull()
+  } finally {
+    release.resolve()
+  }
 })
 
 function orderRequests(calls: Parameters<typeof fetch>[]) {

@@ -118,12 +118,12 @@ export function createApiClient({
       key?: string
     },
   ): Promise<T> {
-    const token = options.auth ? getToken?.() : undefined
+    const token = getToken?.()
     const headers = new Headers({ Accept: 'application/json' })
     try {
       if (options.mockScenario)
         headers.set('X-Shopflow-Mock', options.mockScenario)
-      if (token) headers.set('Authorization', `Bearer ${token}`)
+      if (options.auth && token) headers.set('Authorization', `Bearer ${token}`)
       if (options.body) headers.set('Content-Type', 'application/json')
       if (options.key !== undefined) headers.set('Idempotency-Key', options.key)
     } catch {
