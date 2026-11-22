@@ -71,15 +71,6 @@ const locationText = () => screen.getByLabelText('Location').textContent
 const searchField = () =>
   screen.getByRole('searchbox', { name: 'Search products' })
 
-beforeEach(() => {
-  vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
-})
-
-afterEach(() => {
-  cleanup()
-  vi.restoreAllMocks()
-})
-
 test('debounce replaces pending values and clears its timer on unmount', () => {
   vi.useFakeTimers()
   try {
@@ -112,6 +103,15 @@ test('restores the previous document title after route-title cleanup', () => {
   expect(document.title).toBe('Product')
   unmount()
   expect(document.title).toBe(previous)
+})
+
+beforeEach(() => {
+  vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
+})
+
+afterEach(() => {
+  cleanup()
+  vi.restoreAllMocks()
 })
 
 test('navigates by keyboard, shows formatted product details, and returns to the applied catalog', async () => {
@@ -321,6 +321,61 @@ test('does not show a previously loaded product while the next detail is pending
     expect(
       await screen.findByRole('heading', { name: 'Developer Coffee 0001' }),
     ).toBeVisible()
+  } finally {
+    release.resolve()
+  }
+})
+
+test('keeps the latest search visible when the old server handler finishes late', async () => {
+  const started = Promise.withResolvers<void>()
+  const release = Promise.withResolvers<void>()
+  const finished = Promise.withResolvers<void>()
+  const aborted = Promise.withResolvers<void>()
+  const requests: string[] = []
+  server.use(
+    http.get('*/api/products', async ({ request }) => {
+      const search = new URL(request.url).searchParams.get('search') ?? ''
+      requests.push(search)
+      const id = search === 'duck' ? 'product-0002' : 'product-0003'
+
+      if (search === 'duck') {
+        expect(request.headers.get('X-Shopflow-Mock')).toBe('slow')
+        request.signal.addEventListener('abort', () => aborted.resolve(), {
+          once: true,
+        })
+        started.resolve()
+        await release.promise
+        finished.resolve()
+      }
+      return HttpResponse.json({ items: [inventory.get(id)], total: 1 })
+    }),
+  )
+  const { user } = open('/?mock=race', true)
+  expect(
+    await screen.findByRole('link', { name: 'Developer Coffee 0001' }),
+  ).toBeVisible()
+  try {
+    await user.type(searchField(), 'duck')
+    expect(screen.getByText('Updating search…')).toBeVisible()
+    expect(
+      screen.queryByRole('link', { name: 'Developer Coffee 0001' }),
+    ).not.toBeInTheDocument()
+    await started.promise
+    await user.clear(searchField())
+    await user.type(searchField(), 'coffee')
+    await aborted.promise
+    expect(
+      await screen.findByRole('link', { name: 'Developer Coffee 0001' }),
+    ).toBeVisible()
+    await act(async () => {
+      release.resolve()
+      await finished.promise
+    })
+    expect(
+      screen.queryByRole('link', { name: 'Debug Duck 0001' }),
+    ).not.toBeInTheDocument()
+    expect(locationText()).toBe('/?search=coffee&mock=race')
+    expect(requests.filter(Boolean)).toEqual(['duck', 'coffee'])
   } finally {
     release.resolve()
   }

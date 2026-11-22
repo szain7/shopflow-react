@@ -52,20 +52,35 @@ Phase 0 has no remaining work and no new commit.
 - Headless Chrome verified the skip link receives keyboard focus and the shell fits at 360, 768 and 1280 px. With the mock flag enabled, development returned 5,000 products and a forced 500. The production preview rendered Shopflow without registering a service worker.
 - `npm ci` passed in a clean temporary directory with the repository manifests. Windows blocked replacing loaded native dependencies in the working checkout. `npm install` restored the checkout's dependency tree. The original direct package versions are unchanged.
 - `npm audit` reports three moderate findings tied to the existing ESLint development-tool dependency chain. `npm audit --omit=dev` reports zero vulnerabilities.
-- Day 1 is recorded in the four task-prefixed commits above. No pushes were made. The next task is D2-1 when authorized.
+- Day 1 is recorded in the four task-prefixed commits above. No pushes were made. Day 2 is tracked below.
 
 ## Day 2 — Browse
 
 [Browse guide](ai/browse.md)
 
-| ID   | Status  | Evidence | Remaining work                                       | Commit |
-| ---- | ------- | -------- | ---------------------------------------------------- | ------ |
-| D2-1 | Pending | —        | Build product grid, details and missing-route states | —      |
-| D2-2 | Pending | —        | Add URL filters, sorting, count and paging           | —      |
-| D2-3 | Pending | —        | Cover loading, empty, error and success states       | —      |
-| D2-4 | Pending | —        | Verify cancellation and listener cleanup             | —      |
-| D2-5 | Pending | —        | Reuse at least two typed hooks                       | —      |
-| D2-6 | Pending | —        | Test out-of-order search responses                   | —      |
+| ID   | Status   | Evidence                                                                                                            | Remaining work | Commit                                             |
+| ---- | -------- | ------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------------------- |
+| D2-1 | Complete | Responsive catalog and detail routes, formatted cents, keyboard access, image fallback, and distinct missing states | —              | D2-1 Add catalog and product detail routes         |
+| D2-2 | Complete | Shareable URL filters and pagination, canonical defaults, and tested reload and history                             | —              | D2-2 Restore filters through URL history           |
+| D2-3 | Complete | Live status and safe retry for both routes with documented mock scenario links                                      | —              | D2-3 Verify reproducible browse states and retry   |
+| D2-4 | Complete | StrictMode tests verify detail cancellation, route focus, and scroll listener cleanup                               | —              | D2-4 Manage browse cancellation and scroll cleanup |
+| D2-5 | Complete | Title hook shared by routes, scroll hook shared through Back to Top, and tested debounce cleanup                    | —              | D2-5 Verify reusable typed browse hooks            |
+| D2-6 | Complete | Controlled late response test verifies obsolete search cancellation and current results                             | —              | D2-6 Verify out-of-order search isolation          |
+
+### Day 2 review
+
+- `CatalogPage.tsx` discarded dormant search drafts on history entry changes. A regression test verifies that Back and Forward restore the applied search and page without reviving a pending edit.
+- `BrowseMessage.tsx` moves focus to the main landmark when a focused retry control is activated. Keyboard retry tests cover both list and detail recovery.
+- StrictMode tests covered an obsolete detail request aborting, the old product staying hidden while the next product loads, debounce timer cleanup, title restoration, scroll listener removal, and a deliberately late search response.
+- `useDocumentTitle` is used on catalog, detail, and unknown routes. `useScrollThreshold` is shared by the Back to Top control on catalog and detail, and the typed debounce hook applies only the settled search.
+- Both routes expose reproducible loading, empty or missing, error with retry, and success states. Chrome also verified that Back to Top moved the page to scroll position zero.
+
+### Day 2 validation
+
+- App lint, strict type checking, formatting, production build, and all 37 tests passed.
+- Headless Chrome verified one, two, and four catalog columns at 360, 768, and 1280 px without horizontal overflow. Tab reached the skip link and Enter opened a product, moving focus to the main landmark. Reload restored the detail link. Back and Forward restored the filtered catalog page and product route. The production preview handled a deep link and registered no mock worker.
+- Repository-wide lint still reports the four existing exercise errors documented above. The practice files were unchanged.
+- Day 2 is recorded in the six commits above. No pushes were made.
 
 ## Day 3 — Buy
 
