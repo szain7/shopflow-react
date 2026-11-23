@@ -17,6 +17,7 @@ import {
   primaryClass,
 } from '../../components/ui/commerce'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { demoCredentials } from '../../mocks/demo-credentials'
 import { BrowseMessage, RetryMessage } from '../browse/BrowseMessage'
 import { browseError } from '../browse/browse-queries'
 import { safeReturnPath } from './return-path'
@@ -36,7 +37,11 @@ const invalidMessages = {
   password: 'Enter your password.',
 }
 
-export function LoginPage() {
+export function LoginPage({
+  showDemoCredentials,
+}: {
+  showDemoCredentials: boolean
+}) {
   useDocumentTitle('Sign in | Shopflow')
   const store = useShopStore()
   const signedIn = useShopSelector((state) => Boolean(state.session))
@@ -179,6 +184,17 @@ export function LoginPage() {
         <button type="submit" className={primaryClass} disabled={pending}>
           {pending ? 'Signing in…' : 'Sign in'}
         </button>
+        {import.meta.env.DEV && showDemoCredentials && (
+          <div className="grid gap-1 border-t border-line pt-4 text-sm text-muted">
+            <p className="font-semibold text-ink">Demo Credentials</p>
+            <p className="wrap-break-word">
+              Email: <code>{demoCredentials.email}</code>
+            </p>
+            <p>
+              Password: <code>{demoCredentials.password}</code>
+            </p>
+          </div>
+        )}
       </form>
     </section>
   )
