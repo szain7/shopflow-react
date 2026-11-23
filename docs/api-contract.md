@@ -39,7 +39,7 @@ await fetch('/api/products', { headers: { 'X-Shopflow-Mock': 'server-error' } })
 
 The `X-Shopflow-Mock` header supports `server-error` (500), `empty` (an empty list or product 404), `slow` (600 ms delay), `malformed` (broken JSON), and `invalid-data` (wrong schema). Each applies to list and detail requests.
 
-With development mocks enabled, the browser routes accept the same scenario names in `mock`. Remove the parameter for normal success. A forced failure remains active on retry until the scenario is removed.
+With development or public demo mocks enabled, the browser routes accept the same scenario names in `mock`. Remove the parameter for normal success. A forced failure remains active on retry until the scenario is removed.
 
 | Scenario         | Catalog URL           | Detail URL                                 |
 | ---------------- | --------------------- | ------------------------------------------ |
@@ -52,10 +52,10 @@ For a race, open `/?mock=race`. Type `duck`, let its request start after the 300
 
 Use a missing product ID for product 404. Submit a malformed login body for 400, or a syntactically valid email and wrong password for 401. Use a missing or invalid bearer token on protected endpoints for 401, and a valid token with a missing order ID for order 404. With valid auth and a new idempotency key, use an empty array for order 400 or request two units of `product-0002` for 409. That product starts with one unit. Ordering one unit changes it to zero. Start a fresh tab or reset the ledger for a repeatable stock test.
 
-The development server and test runner use the same REST handlers. Production builds do not register the service worker, even when the environment flag is set.
+Development, the test runner, and the Pages demo use the same REST handlers. Ordinary production builds omit the service worker unless the public demo flag is enabled. On Pages, the paths in this contract are relative to the project base, so `/api/products` is requested as `/shopflow-react/api/products`. The Pages router keeps route parameters and filters inside the hash.
 
 ## Live mock stock
 
-With development mocks enabled, the catalog, product details, cart, and checkout share one WebSocket to the same-origin `/mock/stock` path. MSW 3.0.7 uses `ws.link` from `msw/ws`. The mock cycles the base stock of `product-0002` through 0, 4, and 1 at eight-second intervals. REST and order validation read the same inventory state and subtract existing reservations. Reloading resets the simulated base stock. Tab orders still follow the ledger's lifetime above.
+With mocks enabled, the catalog, product details, cart, and checkout share one WebSocket at the same-origin `/mock/stock` path under the deployment base. MSW 3.0.7 uses `ws.link` from `msw/ws`. The mock cycles the base stock of `product-0002` through 0, 4, and 1 at eight-second intervals. REST and order validation read the same inventory state and subtract existing reservations. Reloading resets the simulated base stock. Tab orders still follow the ledger's lifetime above.
 
 A frame has shape `{ type: "stock", productId: string, stock: nonnegative integer }`. The app validates frames and refetches product queries, including lists whose membership depends on availability. On disconnect it retries after 500 ms with exponential backoff capped at eight seconds. Opening or reopening the connection refetches product data to recover missed changes, including when a shopper returns from a route without a feed. Leaving the shopping routes stops the connection and cancels retries. For a visible demonstration, add Debug Duck 0001 to the cart before its first tick and stay on the cart. The stock warning changes and the requested quantity stays visible.

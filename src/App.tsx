@@ -1,6 +1,13 @@
 import { formatPrice } from './components/ui/format-price'
 import { useEffect, useRef } from 'react'
-import { Link, matchPath, Route, Routes, useLocation } from 'react-router'
+import {
+  Link,
+  matchPath,
+  Route,
+  Routes,
+  useHref,
+  useLocation,
+} from 'react-router'
 import { selectCartCount, selectCartTotal } from './app/store'
 import { useShopSelector } from './app/store-hooks'
 import {
@@ -17,10 +24,15 @@ import { useLiveStock } from './hooks/useLiveStock'
 
 export default function App({
   mockScenarios = false,
+  hashRouting = false,
+  publicDemo = false,
 }: {
   mockScenarios?: boolean
+  hashRouting?: boolean
+  publicDemo?: boolean
 }) {
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
+  const skipHref = useHref({ pathname, search, hash: '#main-content' })
   const previousPath = useRef(pathname)
   const main = useRef<HTMLElement>(null)
   const count = useShopSelector(selectCartCount)
@@ -42,7 +54,22 @@ export default function App({
     <div className="min-h-screen bg-surface text-ink">
       <a
         className="sr-only rounded-md bg-brand px-4 py-2 text-white focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
-        href="#main-content"
+        href={hashRouting ? skipHref : '#main-content'}
+        onClick={
+          hashRouting
+            ? (event) => {
+                if (
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                )
+                  return
+                event.preventDefault()
+                main.current?.focus()
+              }
+            : undefined
+        }
       >
         Skip to main content
       </a>
@@ -53,6 +80,9 @@ export default function App({
             to="/"
           >
             Shopflow
+            {publicDemo && (
+              <span className="ml-2 text-sm text-muted">Demo</span>
+            )}
           </Link>
           <nav
             aria-label="Shop navigation"

@@ -1,6 +1,6 @@
 # Shopflow architecture
 
-Shopflow is a React and TypeScript storefront. Vite serves the development app, Tailwind styles it, and MSW supplies a local REST API and stock feed when development mocks are enabled.
+Shopflow is a React and TypeScript storefront. Vite serves the development app, Tailwind styles it, and MSW supplies a simulated REST API and stock feed in local mock mode and the public Pages demo. The Pages build uses hash routing under `/shopflow-react/`.
 
 ## Repository layout
 
@@ -31,7 +31,7 @@ flowchart LR
     Query --> Client["Typed fetch client and Zod schemas"]
     Redux -->|"Checkout mutation"| Client
     View -->|"Sign-in mutation"| Client
-    Client <-->|"REST requests and responses"| Mock["MSW REST handlers in development"]
+    Client <-->|"REST requests and responses"| Mock["MSW REST handlers in mock mode"]
     Mock <--> Inventory["Shared mock inventory and order ledger"]
     Inventory --> Feed["Mock WebSocket stock feed"]
     Feed -->|"Validated signal invalidates products"| Query

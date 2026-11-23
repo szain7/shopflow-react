@@ -2,19 +2,31 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
-import { BrowserRouter } from 'react-router'
+import { BrowserRouter, HashRouter } from 'react-router'
 import App from './App'
 import { RenderBoundary } from './app/RenderBoundary'
 import { reportRenderFailure } from './app/render-monitor'
+import { sitePath } from './app/site-config'
 import { browserStorage, createShopStore } from './app/store'
 import './styles/app.css'
 
 async function bootstrap() {
+  const publicDemo = import.meta.env.VITE_PUBLIC_DEMO === 'true'
+  const hashRouting = import.meta.env.MODE === 'pages'
+  const Router = hashRouting ? HashRouter : BrowserRouter
   const mockScenarios =
-    import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS === 'true'
+    publicDemo ||
+    (import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS === 'true')
   if (mockScenarios) {
     const { worker } = await import('./mocks/browser')
-    await worker.start({ onUnhandledFrame: 'bypass', quiet: true })
+    await worker.start({
+      serviceWorker: {
+        url: sitePath('mockServiceWorker.js'),
+        options: { scope: import.meta.env.BASE_URL },
+      },
+      onUnhandledFrame: 'bypass',
+      quiet: true,
+    })
   }
 
   const container = document.getElementById('root')
@@ -34,11 +46,15 @@ async function bootstrap() {
     <StrictMode>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
+          <Router>
             <RenderBoundary>
-              <App mockScenarios={mockScenarios} />
+              <App
+                mockScenarios={mockScenarios}
+                hashRouting={hashRouting}
+                publicDemo={publicDemo}
+              />
             </RenderBoundary>
-          </BrowserRouter>
+          </Router>
         </QueryClientProvider>
       </Provider>
     </StrictMode>,

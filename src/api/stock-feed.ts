@@ -1,6 +1,16 @@
 import { z } from 'zod'
+import { sitePath } from '../app/site-config'
 
 export const stockFeedPath = '/mock/stock'
+
+export function stockSocketUrl(
+  origin: string,
+  base = import.meta.env.BASE_URL,
+) {
+  const url = new URL(sitePath(stockFeedPath, base), origin)
+  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+  return url
+}
 export const stockUpdateSchema = z.object({
   type: z.literal('stock'),
   productId: z.string().min(1),
