@@ -120,7 +120,7 @@ Phase 0 has no remaining work and no new commit.
 | D4-2 | Complete | Compared the two slowest mock stages before and after with the same workload. See [performance](performance.md). | —                                                                | D4-2 Reduce measured catalog handler work      |
 | D4-3 | Complete | Browser verified bounded rendering on early and late pages of the 5,000-product catalog.                         | —                                                                | D4-3 Verify bounded paging after stock changes |
 | D4-4 | Complete | Browser live update reached the cart. Tests cover validation, backoff, reconciliation, and StrictMode cleanup.   | —                                                                | D4-4 Add reconnecting mock stock feed          |
-| D4-5 | Complete | 63 passing tests retain cart, hooks, login, history, race, 401, checkout, conflict, and replay coverage.         | —                                                                | D4-5 Cover live updates and cleanup            |
+| D4-5 | Complete | 64 passing tests retain prior coverage and verify stock WebSocket handling across REST overrides and resets.     | —                                                                | D4-5 Cover live updates and cleanup            |
 | D4-6 | Partial  | PR workflow added. Clean local install and all workflow commands passed. See [CI setup](ci.md).                  | Hosted PR run and required status check setup remain unverified. | D4-6 Add pull request application checks       |
 | D4-7 | Complete | Render failure test verified focus, sanitized logging, and recovery. See [monitoring](monitoring.md).            | —                                                                | D4-7 Add sanitized render recovery             |
 
@@ -138,6 +138,8 @@ Phase 0 has no remaining work and no new commit.
 - Repository-wide lint still reports unused variables on lines 54 and 161, a constant condition on line 64, and a redeclaration on line 102 in the preserved exercise file. The PR workflow checks app, tests, and tooling.
 - Remote CI, branch rules, deployments, and Git history were untouched. Day 4 is recorded in the seven commits above.
 
+- Follow-up: 64 tests passed with console output visible and no unmatched MSW WebSocket errors. The test server now registers the stock socket, unmounts views before resetting handlers, and fails on unexpected socket connections.
+
 ## Day 5 — Explain
 
 [Explain guide](ai/explain.md)
@@ -154,7 +156,9 @@ Phase 0 has no remaining work and no new commit.
 | D5-8 | Draft               | [Provisional evidence and blank ratings](reflection.md)                                                              | Official tracker, personal ratings, two gaps and next steps | D5-8 Prepare reflection evidence and prompts        |
 | D5-9 | External pending    | [PR draft](pr-description.md), [timed walkthrough](walkthrough.md), and [31-task checklist](acceptance-checklist.md) | Final PR, hosted CI, and spoken walkthrough                 | D5-9 Prepare submission and record pending checks   |
 
-### Day 5 scope
+#- Follow-up: 64 tests passed with console output visible and no unmatched MSW WebSocket errors. The test server now registers the stock socket, unmounts views before resetting handlers, and fails on unexpected socket connections.
+
+## Day 5 scope
 
 Documentation and submission preparation only. Day 4 standalone screen-reader verification, GitHub-hosted workflow execution, and required-status-check enforcement remain pending. The commits above record local documentation and preparation. The final PR and deployment remain outside this review.
 

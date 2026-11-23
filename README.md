@@ -29,20 +29,20 @@ To try checkout, add a product, open the cart, and select **Checkout**. Use the 
 
 ## Scripts
 
-| Command                 | Purpose                                                             |
-| ----------------------- | ------------------------------------------------------------------- |
-| `npm run dev`           | Start the Vite development server                                   |
-| `npm run build`         | Build the production shell into `dist`                              |
-| `npm run preview`       | Serve the production build locally after building                   |
-| `npm run lint`          | Lint the whole repository, including the four known exercise errors |
-| `npm run lint:app`      | Lint the app, tests, and tooling                                    |
-| `npm run typecheck`     | Strictly check application, test, and TypeScript tooling files      |
-| `npm run format`        | Apply Prettier to project files in scope                            |
-| `npm run format:check`  | Check formatting without writing files                              |
-| `npm test`              | Run Vitest in watch mode during local development                   |
-| `npm run test:run`      | Run the test suite once                                             |
-| `npm run practice`      | Run the original Week 1 practice script                             |
-| `npm run practice:test` | Run the original practice script previously mapped to `npm test`    |
+| Command                 | Purpose                                                                       |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| `npm run dev`           | Start the Vite development server                                             |
+| `npm run build`         | Build the production shell into `dist`                                        |
+| `npm run preview`       | Serve the production build locally after building                             |
+| `npm run lint`          | Lint the repository, excluding generated files and `src/practice/practice.js` |
+| `npm run lint:app`      | Lint the app, tests, and tooling                                              |
+| `npm run typecheck`     | Strictly check application, test, and TypeScript tooling files                |
+| `npm run format`        | Apply Prettier to project files in scope                                      |
+| `npm run format:check`  | Check formatting without writing files                                        |
+| `npm test`              | Run Vitest in watch mode during local development                             |
+| `npm run test:run`      | Run the test suite once                                                       |
+| `npm run practice`      | Run the original Week 1 practice script                                       |
+| `npm run practice:test` | Run the original practice script previously mapped to `npm test`              |
 
 PowerShell users can use `npm.cmd` if their execution policy blocks `npm.ps1`. See [progress](docs/progress.md) for validation and [decisions](docs/decisions.md) for trade-offs.
 
