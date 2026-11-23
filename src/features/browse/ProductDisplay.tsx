@@ -1,8 +1,8 @@
 import { formatPrice } from '../../components/ui/format-price'
 import { useState } from 'react'
 import type { Product } from '../../api/schemas'
+import { productPlaceholderUrl as placeholder } from '../../app/site-config'
 
-const placeholder = '/product-placeholder.svg'
 function ProductImage({
   product,
   eager,

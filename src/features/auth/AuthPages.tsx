@@ -184,17 +184,18 @@ export function LoginPage({
         <button type="submit" className={primaryClass} disabled={pending}>
           {pending ? 'Signing in…' : 'Sign in'}
         </button>
-        {import.meta.env.DEV && showDemoCredentials && (
-          <div className="grid gap-1 border-t border-line pt-4 text-sm text-muted">
-            <p className="font-semibold text-ink">Demo Credentials</p>
-            <p className="wrap-break-word">
-              Email: <code>{demoCredentials.email}</code>
-            </p>
-            <p>
-              Password: <code>{demoCredentials.password}</code>
-            </p>
-          </div>
-        )}
+        {(import.meta.env.DEV || import.meta.env.VITE_PUBLIC_DEMO === 'true') &&
+          showDemoCredentials && (
+            <div className="grid gap-1 border-t border-line pt-4 text-sm text-muted">
+              <p className="font-semibold text-ink">Demo Credentials</p>
+              <p className="wrap-break-word">
+                Email: <code>{demoCredentials.email}</code>
+              </p>
+              <p>
+                Password: <code>{demoCredentials.password}</code>
+              </p>
+            </div>
+          )}
       </form>
     </section>
   )

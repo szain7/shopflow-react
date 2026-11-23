@@ -15,9 +15,17 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { StrictMode } from 'react'
 import { Provider } from 'react-redux'
-import { Link, MemoryRouter, useLocation, useNavigate } from 'react-router'
+import {
+  HashRouter,
+  Link,
+  MemoryRouter,
+  useLocation,
+  useNavigate,
+} from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from '../App'
+import { stockSocketUrl } from '../api/stock-feed'
+import { sitePath } from '../app/site-config'
 import { createShopStore } from '../app/store'
 import { useDebouncedAction } from '../hooks/useDebouncedAction'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
@@ -74,6 +82,66 @@ function open(entry = '/', mockScenarios = false) {
 const locationText = () => screen.getByLabelText('Location').textContent
 const searchField = () =>
   screen.getByRole('searchbox', { name: 'Search products' })
+
+test('Pages assets, mock requests, and stock sockets stay under the repository path', () => {
+  const base = '/shopflow-react/'
+  expect(sitePath('product-placeholder.svg', base)).toBe(
+    '/shopflow-react/product-placeholder.svg',
+  )
+  expect(sitePath('mockServiceWorker.js', base)).toBe(
+    '/shopflow-react/mockServiceWorker.js',
+  )
+  expect(sitePath('/api/products', base)).toBe('/shopflow-react/api/products')
+  expect(stockSocketUrl('https://shopflow.test', base).href).toBe(
+    'wss://shopflow.test/shopflow-react/mock/stock',
+  )
+  expect(stockSocketUrl('http://shopflow.test').href).toBe(
+    'ws://shopflow.test/mock/stock',
+  )
+})
+
+test('hash routes retain filters and protected destinations under the Pages path', async () => {
+  const original = window.location.href
+  window.history.replaceState(null, '', '/shopflow-react/#/?category=ducks')
+  const client = new QueryClient({
+    defaultOptions: { queries: { gcTime: Infinity } },
+  })
+  const user = userEvent.setup()
+  const view = render(
+    <StrictMode>
+      <Provider store={createShopStore(client)}>
+        <QueryClientProvider client={client}>
+          <HashRouter>
+            <App hashRouting publicDemo />
+          </HashRouter>
+        </QueryClientProvider>
+      </Provider>
+    </StrictMode>,
+  )
+  try {
+    expect(screen.getByLabelText('Category')).toHaveValue('ducks')
+    const skip = screen.getByRole('link', { name: 'Skip to main content' })
+    await user.click(skip)
+    expect(screen.getByRole('main')).toHaveFocus()
+    expect(window.location.hash).toBe('#/?category=ducks')
+    const item = await screen.findByRole('link', { name: 'Debug Duck 0001' })
+    await user.click(item)
+    expect(window.location.pathname).toBe('/shopflow-react/')
+    expect(window.location.hash).toBe('#/products/product-0002?category=ducks')
+    act(() => {
+      window.location.hash = '/orders/reviewer-order'
+    })
+    expect(
+      await screen.findByRole('heading', { name: 'Sign in' }),
+    ).toBeVisible()
+    expect(window.location.hash).toBe(
+      '#/login?returnTo=%2Forders%2Freviewer-order',
+    )
+  } finally {
+    view.unmount()
+    window.history.replaceState(null, '', original)
+  }
+})
 
 test('debounce replaces pending values and clears its timer on unmount', () => {
   vi.useFakeTimers()

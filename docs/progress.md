@@ -163,3 +163,7 @@ Phase 0 has no remaining work and no new commit.
 Documentation and submission preparation only. Day 4 standalone screen-reader verification, GitHub-hosted workflow execution, and required-status-check enforcement remain pending. The commits above record local documentation and preparation. The final PR and deployment remain outside this review.
 
 Verified 146 local links, two Mermaid diagrams, npm script names, and all 31 task IDs. App lint, strict type checking, formatting, all 63 tests, and the production build passed. Chrome verified the mocked development catalog and a production cart deep link without a mock worker. Repository-wide lint still reports the four existing exercise errors.
+
+## GitHub Pages demo
+
+The Pages workflow is prepared locally. The Pages build uses hash routing and serves assets and mock requests under the repository base. A local static server with no SPA fallback supported catalog filtering, product and cart refresh, protected sign-in return, checkout, order refresh, and live stock in Chrome. The ordinary build retained the product placeholder and omitted the mock worker and demo credentials. The full suite passed 66 tests. GitHub Pages setup and the first hosted deployment are pending.

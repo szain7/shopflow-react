@@ -1,5 +1,6 @@
 import { categories } from '../api/schemas'
 import type { Product } from '../api/schemas'
+import { productPlaceholderUrl } from '../app/site-config'
 
 const groups = [
   { category: categories[0], label: 'Mechanical Keyboard' },
@@ -21,7 +22,7 @@ export const inventory = new Map<string, Product>(
           price: 299 + index * 7 + group * 300,
           stock: (index + group) % 13,
           rating: 3 + ((index + group) % 21) / 10,
-          imageUrl: '/product-placeholder.svg',
+          imageUrl: productPlaceholderUrl,
         },
       ]
     }),

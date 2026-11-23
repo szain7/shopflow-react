@@ -1,4 +1,5 @@
 import type { z } from 'zod'
+import { sitePath } from '../app/site-config'
 import {
   errorEnvelopeSchema,
   loginBodySchema,
@@ -133,7 +134,7 @@ export function createApiClient({
     let response: Response
     try {
       response = await fetch(
-        new URL(path, origin ?? globalThis.location.origin),
+        new URL(sitePath(path), origin ?? globalThis.location.origin),
         {
           method: options.body ? 'POST' : 'GET',
           headers,

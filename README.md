@@ -12,7 +12,7 @@ Shopflow is a developer gear storefront built for The Bug Bazaar assignment. Bro
 
 ### Public environment variables
 
-For the local catalog without a backend, copy `.env.example` to `.env.local`, set `VITE_ENABLE_MOCKS=true`, and restart Vite. Mocks are off by default and only work with the development server. The test runner starts its own mocks automatically. Keep secrets out of all `VITE_` variables because Vite exposes them to the browser.
+For the local catalog without a backend, copy `.env.example` to `.env.local`, set `VITE_ENABLE_MOCKS=true`, and restart Vite. This flag enables development mocks. The test runner starts its own mocks automatically. Keep secrets out of all `VITE_` variables because Vite exposes them to the browser.
 
 `VITE_DISPLAY_CURRENCY` controls the price display currency code and defaults to USD. The API still sends integer cents. For a deployed build, serve the shared `/api` endpoints on the same origin and configure the host to send client routes such as `/products/product-0002` to `index.html`.
 
@@ -33,6 +33,7 @@ To try checkout, add a product, open the cart, and select **Checkout**. Use the 
 | ----------------------- | ----------------------------------------------------------------------------- |
 | `npm run dev`           | Start the Vite development server                                             |
 | `npm run build`         | Build the production shell into `dist`                                        |
+| `npm run build:pages`   | Build the static GitHub Pages demo into `dist`                                |
 | `npm run preview`       | Serve the production build locally after building                             |
 | `npm run lint`          | Lint the repository, excluding generated files and `src/practice/practice.js` |
 | `npm run lint:app`      | Lint the app, tests, and tooling                                              |
@@ -45,6 +46,22 @@ To try checkout, add a product, open the cart, and select **Checkout**. Use the 
 | `npm run practice:test` | Run the original practice script previously mapped to `npm test`              |
 
 PowerShell users can use `npm.cmd` if their execution policy blocks `npm.ps1`. See [progress](docs/progress.md) for validation and [decisions](docs/decisions.md) for trade-offs.
+
+## GitHub Pages deployment
+
+The expected URL is [szain7.github.io/shopflow-react](https://szain7.github.io/shopflow-react/). In the GitHub repository `szain7/shopflow-react`, select **Settings → Pages → Build and deployment → Source → GitHub Actions**. Set the `github-pages` environment to allow deployments from `main` if your repository uses deployment protection. Once the workflow is on `main`, a push to `main` or a manual run from `main` runs validation, builds the demo, and deploys the `dist` artifact. See [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+
+To verify the same build locally:
+
+```sh
+npm ci
+npm run build:pages
+npm run preview -- --mode pages
+```
+
+Open the preview URL followed by `/shopflow-react/`. For a direct route, try `/shopflow-react/#/login`. Pages uses hash routes so the browser requests the same static HTML on refresh. Local development uses regular browser routes.
+
+Pages mode explicitly enables the public `VITE_PUBLIC_DEMO` flag in `.env.pages`. The site displays a **Demo** label, uses the fake reviewer account, and simulates APIs and stock with a service worker and an intercepted WebSocket. Use a browser that supports service workers on HTTPS or localhost. Regular `npm run build` omits the mocks and worker unless `VITE_PUBLIC_DEMO=true` is explicitly set. GitHub Pages hosts static files. Accounts, stock, and orders are browser-local simulations, and the cart and order ledger follow the demo limits above.
 
 ## Documentation
 
