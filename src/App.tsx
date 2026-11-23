@@ -85,7 +85,10 @@ export default function App({
             element={<ProductPage mockScenarios={mockScenarios} />}
           />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/login"
+            element={<LoginPage showDemoCredentials={mockScenarios} />}
+          />
           <Route element={<RequireSession />}>
             <Route path="/checkout" element={<CartPage checkout />} />
             <Route path="/account" element={<AccountPage />} />

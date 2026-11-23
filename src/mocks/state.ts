@@ -1,11 +1,9 @@
 import { z } from 'zod'
 import { orderBodySchema } from '../api/schemas'
 import type { OrderBody, Product } from '../api/schemas'
+import { demoCredentials } from './demo-credentials'
 
-export const demoCredentials = {
-  email: 'learner@example.test',
-  password: 'shopflow-demo',
-}
+export { demoCredentials }
 export const demoUser = {
   id: 'demo-user',
   name: 'Shopflow Learner',
