@@ -96,6 +96,35 @@ test('debounce replaces pending values and clears its timer on unmount', () => {
   }
 })
 
+test('stock sockets stay handled with REST scenario overrides and after reset', async () => {
+  async function connectAndClose() {
+    const url = new URL('/mock/stock', window.location.href)
+    url.protocol = 'ws:'
+    const socket = new WebSocket(url)
+    try {
+      await new Promise<void>((resolve, reject) => {
+        socket.addEventListener('open', () => resolve(), { once: true })
+        socket.addEventListener(
+          'error',
+          () => reject(new Error('Stock socket failed to open')),
+          { once: true },
+        )
+      })
+    } finally {
+      socket.close()
+    }
+  }
+
+  server.use(
+    http.get('*/api/products', () =>
+      HttpResponse.json({ items: [], total: 0 }),
+    ),
+  )
+  await connectAndClose()
+  server.resetHandlers()
+  await connectAndClose()
+})
+
 test('restores the previous document title after route-title cleanup', () => {
   const previous = document.title
   const { rerender, unmount } = renderHook(
