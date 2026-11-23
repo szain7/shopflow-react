@@ -32,6 +32,6 @@ Use the [assignment plan](plans/shopflow-codex.plan.md) for the full criteria an
 | D5-4 | [Latency, idempotency, scaling, CDN, invalidation and consistency](glossary.md)      | Draft for personal wording review                                       |
 | D5-5 | [Architecture peer review](peer-review.md)                                           | Pending genuine partner architecture review                             |
 | D5-6 | [PR feedback and code review](peer-review.md)                                        | Pending genuine PR reviews and responses                                |
-| D5-7 | [Responsible AI use](ai-notes.md)                                                    | Draft awaiting what you would not delegate and why                      |
+| D5-7 | [Responsible AI use](ai-notes.md)                                                    | Complete                                                                |
 | D5-8 | [Self-assessment and learning plan](reflection.md)                                   | Draft awaiting tracker, self-ratings and learning gaps                  |
 | D5-9 | [PR and technical walkthrough](walkthrough.md)                                       | Pending final PR with passing CI and live walkthrough                   |
