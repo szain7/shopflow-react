@@ -6,7 +6,11 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default defineConfig([
-  globalIgnores(['dist', 'public/mockServiceWorker.js']),
+  globalIgnores([
+    'dist',
+    'public/mockServiceWorker.js',
+    'src/practice/practice.js',
+  ]),
   {
     files: ['**/*.js'],
     extends: [js.configs.recommended],
