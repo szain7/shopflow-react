@@ -1,4 +1,4 @@
-name: Deploy Shopflow demo to Pages
+name: Shopflow CD
 
 on:
   push:

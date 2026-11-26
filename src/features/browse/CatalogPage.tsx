@@ -81,7 +81,7 @@ function CatalogResults({
           ` · Page ${filters.page} of ${pages}`}
       </p>
       {items.length ? (
-        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((product) => (
             <li
               key={product.id}
